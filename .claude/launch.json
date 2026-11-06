@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "astrologie-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/thomascaron/Documents/Projets_Perso/astrologie", "run", "dev", "--", "--port", "3108"],
+      "port": 3108
+    }
+  ]
+}
