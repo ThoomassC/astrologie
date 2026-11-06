@@ -1,0 +1,330 @@
+/* Accueil : ciel du jour, l'astrologie en bref, frise, portes. */
+
+.hero {
+  display: grid;
+  gap: var(--s-6);
+  padding-block: var(--s-6) var(--s-8);
+  align-items: center;
+  grid-template-areas:
+    "wheel"
+    "text"
+    "positions";
+}
+
+.heroText {
+  grid-area: text;
+  display: grid;
+  gap: var(--s-4);
+  align-content: center;
+}
+
+.heroWheel {
+  grid-area: wheel;
+  width: min(100%, 34rem);
+  margin-inline: auto;
+}
+
+.positions {
+  grid-area: positions;
+}
+
+@media (min-width: 960px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-areas:
+      "text wheel"
+      "positions wheel";
+    column-gap: var(--s-8);
+    min-height: min(46rem, calc(100dvh - var(--barre)));
+  }
+
+  .heroWheel {
+    width: 100%;
+    max-width: 40rem;
+    align-self: start;
+  }
+}
+
+.date {
+  color: var(--or-texte);
+  font-variant-numeric: tabular-nums;
+  min-height: 1.6em;
+}
+
+.heroTitle {
+  font-size: var(--t-hero);
+  line-height: 0.95;
+}
+
+.heroLead {
+  max-width: 32rem;
+  font-family: var(--font-fell);
+  font-style: italic;
+  font-size: var(--t-xl);
+  line-height: 1.35;
+  color: var(--encre-douce);
+}
+
+.sentence {
+  max-width: 34rem;
+  font-size: var(--t-resume);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-top: var(--s-2);
+}
+
+.positionsTitle {
+  font-family: var(--font-fell);
+  font-size: var(--t-lg);
+  margin-bottom: var(--s-3);
+}
+
+.positionList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
+  gap: var(--s-1) var(--s-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.positionList li {
+  display: grid;
+  grid-template-columns: 1.6rem 6.2rem 1fr;
+  align-items: center;
+  min-height: 2rem;
+  border-bottom: 1px solid var(--filet);
+}
+
+.positionGlyph {
+  color: var(--or);
+}
+
+.positionName {
+  color: var(--encre-douce);
+}
+
+.positionValue {
+  color: var(--encre);
+}
+
+.retro {
+  color: var(--feu);
+  font-style: italic;
+}
+
+.placeholder .positionValue {
+  color: var(--encre-douce);
+}
+
+.aspectsTitle {
+  margin-top: var(--s-5);
+}
+
+.aspectList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: var(--s-1) var(--s-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-sm);
+}
+
+.aspectList li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 2rem;
+  border-bottom: 1px solid var(--filet);
+}
+
+.aspectEmpty {
+  font-size: var(--t-sm);
+  color: var(--encre-douce);
+}
+
+/* Échantillon du trait de l'aspect sur la roue : même couleur, même motif (harmonieux : plein ; tendu : tirets). */
+.swatch {
+  flex: none;
+}
+
+.swatch line {
+  stroke-width: 2;
+}
+
+.swatchHarmonious {
+  stroke: var(--eau);
+}
+
+.swatchTense {
+  stroke: var(--feu);
+  stroke-dasharray: 6 3;
+}
+
+@media (forced-colors: active) {
+  .swatch line {
+    stroke: CanvasText;
+  }
+}
+
+.essentials {
+  display: grid;
+  gap: var(--s-6);
+}
+
+.essentialsGrid {
+  display: grid;
+  gap: var(--s-7) var(--s-6);
+}
+
+@media (min-width: 900px) {
+  .essentialsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.friezeLead {
+  max-width: var(--lecture);
+  margin-block: var(--s-3) var(--s-5);
+  color: var(--encre-douce);
+}
+
+.frieze {
+  display: flex;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0 0 var(--s-4);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--or) transparent;
+}
+
+.frieze li {
+  flex: 0 0 13.5rem;
+  scroll-snap-align: start;
+}
+
+.friezeItem {
+  display: grid;
+  gap: var(--s-2);
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--or) 45%, transparent);
+  border-radius: var(--r-md);
+  background: var(--plaque);
+  color: var(--encre);
+  text-decoration: none;
+}
+
+.friezeItem:hover {
+  border-color: var(--or);
+}
+
+.friezeImage {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: calc(var(--r-md) - 6px);
+}
+
+.friezeImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.friezeName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 0 var(--s-1) var(--s-1);
+  font-family: var(--font-titre);
+  font-size: var(--t-xl);
+}
+
+.friezeGlyph {
+  color: var(--or);
+}
+
+.doors ul {
+  display: grid;
+  gap: var(--s-6) var(--s-7);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  .doors ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.door {
+  position: relative;
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: var(--s-5);
+  align-items: center;
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--filet);
+}
+
+.doorArt {
+  display: grid;
+  place-items: center;
+  width: 7rem;
+  aspect-ratio: 1;
+  color: var(--or);
+}
+
+.doorImage {
+  width: 7rem;
+  height: 7rem;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--or) 55%, transparent);
+}
+
+.doorWheel {
+  width: 7rem;
+}
+
+.doorGlyphs {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: var(--s-2);
+}
+
+.doorTitle {
+  font-size: var(--t-2xl);
+}
+
+.doorTitle a {
+  color: var(--encre);
+  text-decoration: none;
+}
+
+.doorTitle a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.doorTitle a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--or);
+}
+
+.doorText {
+  margin-top: var(--s-2);
+  color: var(--encre-douce);
+}

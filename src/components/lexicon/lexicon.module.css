@@ -1,0 +1,64 @@
+.letters ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  margin: 0 0 var(--s-6);
+  padding: 0;
+  list-style: none;
+}
+
+.letters a {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--filet);
+  font-family: var(--font-titre);
+  font-size: var(--t-lg);
+  color: var(--encre);
+  text-decoration: none;
+}
+
+.letters a:hover {
+  border-color: var(--or);
+}
+
+.letter {
+  display: grid;
+  gap: var(--s-5);
+  scroll-margin-top: calc(var(--barre) + var(--s-4));
+}
+
+.letterTitle {
+  font-size: var(--t-3xl);
+  color: var(--or-texte);
+  border-bottom: 1px solid var(--filet);
+}
+
+.entries {
+  display: grid;
+  gap: var(--s-7) var(--s-6);
+}
+
+@media (min-width: 900px) {
+  .entries {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.entry {
+  display: grid;
+  gap: var(--s-3);
+  align-content: start;
+  scroll-margin-top: calc(var(--barre) + var(--s-4));
+}
+
+.term {
+  font-size: var(--t-xl);
+}
+
+.see {
+  font-size: var(--t-sm);
+  color: var(--encre-douce);
+}

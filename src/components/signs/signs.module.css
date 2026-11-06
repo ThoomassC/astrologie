@@ -1,0 +1,292 @@
+/* Galerie des signes, fiches, tableaux. */
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: var(--s-6) var(--s-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--plaque);
+  border: 1px solid color-mix(in srgb, var(--or) 45%, transparent);
+  border-radius: var(--r-lg);
+  padding: 10px;
+  transition: border-color var(--duree) ease;
+}
+
+.card:hover,
+.card:focus-within {
+  border-color: var(--or);
+}
+
+.cardImage {
+  overflow: hidden;
+  border-radius: calc(var(--r-lg) - 8px);
+  aspect-ratio: 4 / 3;
+}
+
+.cardImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardBody {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--s-1) var(--s-3);
+  padding: var(--s-4) var(--s-3) var(--s-3);
+}
+
+.cardGlyph {
+  color: var(--or);
+  grid-row: span 2;
+}
+
+.cardName {
+  font-family: var(--font-titre);
+  font-size: var(--t-2xl);
+  line-height: 1;
+}
+
+.cardLink {
+  color: var(--encre);
+  text-decoration: none;
+}
+
+.cardLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-lg);
+}
+
+.cardLink:focus-visible {
+  outline: none;
+}
+
+.cardLink:focus-visible::after {
+  outline: 2px solid var(--lapis);
+  outline-offset: 3px;
+}
+
+.cardDates {
+  color: var(--encre-douce);
+  font-size: var(--t-sm);
+}
+
+.cardMeta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-4);
+  margin-top: var(--s-2);
+  font-size: var(--t-sm);
+}
+
+.cardKeywords {
+  grid-column: 1 / -1;
+  color: var(--encre-douce);
+  font-family: var(--font-fell);
+  font-style: italic;
+  font-size: var(--t-md);
+}
+
+.pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+}
+
+.pastille::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  border-radius: 50%;
+  background: var(--pastille, var(--or));
+  flex: none;
+}
+
+.quartet,
+.trio {
+  display: grid;
+  gap: var(--s-7) var(--s-6);
+}
+
+@media (min-width: 900px) {
+  .quartet {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trio {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.elementLead {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.signLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.matrix,
+.table {
+  width: 100%;
+  min-width: 30rem;
+  border: 1px solid var(--filet);
+  border-radius: var(--r-sm);
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  background: var(--plaque);
+}
+
+.matrix caption,
+.table caption {
+  caption-side: top;
+  text-align: left;
+  padding-bottom: var(--s-3);
+  font-family: var(--font-fell);
+  font-style: italic;
+  font-size: var(--t-lg);
+}
+
+.matrix th,
+.matrix td,
+.table th,
+.table td {
+  padding: var(--s-3) var(--s-4);
+  text-align: left;
+  border-bottom: 1px solid var(--filet);
+}
+
+.matrix tr:last-child > *,
+.table tr:last-child > * {
+  border-bottom: 0;
+}
+
+.matrix thead th,
+.table thead th {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--encre-douce);
+}
+
+/* Fiche d'un signe. */
+.signTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.titleGlyph {
+  color: var(--or);
+  flex: none;
+}
+
+.miniWheel {
+  max-width: 16rem;
+  margin-inline: auto;
+}
+
+.keywords {
+  display: grid;
+  gap: var(--s-5);
+  max-width: var(--lecture);
+}
+
+@media (min-width: 640px) {
+  .keywords {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.keywordsTitle {
+  font-family: var(--font-fell);
+  font-size: var(--t-lg);
+  margin-bottom: var(--s-2);
+}
+
+.keywords ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.keywords li::marker {
+  color: var(--or);
+}
+
+.passage {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.passageNote {
+  font-size: var(--t-xs);
+  color: var(--encre-douce);
+}
+
+.prevNext {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--s-4);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--filet);
+}
+
+.prevNext a {
+  display: grid;
+  gap: var(--s-1);
+  padding: var(--s-4);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-lg);
+  color: var(--encre);
+  text-decoration: none;
+}
+
+.prevNext a:hover {
+  border-color: var(--or);
+}
+
+.nextLink {
+  text-align: right;
+  justify-items: end;
+}
+
+.prevNextLabel {
+  font-size: var(--t-sm);
+  color: var(--encre-douce);
+}
+
+.prevNextName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-family: var(--font-titre);
+  font-size: var(--t-xl);
+  color: var(--encre);
+}
+
+.prevNextName svg {
+  color: var(--or);
+}

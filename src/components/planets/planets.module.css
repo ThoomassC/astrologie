@@ -1,0 +1,194 @@
+/* Sphères texturées, galerie et fiches des astres. */
+
+.sphereBox {
+  position: relative;
+  aspect-ratio: 1;
+  margin-inline: auto;
+  isolation: isolate;
+}
+
+.sphere {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-color: #1c1c22;
+  background-image: var(--map);
+  background-size: 200% 100%;
+  background-repeat: repeat-x;
+  animation-duration: 90s;
+}
+
+/* Rotation : jamais perpétuelle (WCAG 2.2.2). Elle ne joue qu'au survol ou au focus de la carte qui porte la sphère
+   (galerie des astres, portes de l'accueil), et seulement si le mouvement n'est pas réduit. */
+@media (prefers-reduced-motion: no-preference) {
+  li:is(:hover, :focus-within) .sphere {
+    animation-name: spin;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+}
+
+/* Terminateur et reflet, en dégradés : ils suivent la taille de la sphère. */
+.sphere::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, rgb(255 255 255 / 0.1), transparent 42%),
+    radial-gradient(circle at 30% 28%, transparent 46%, rgb(0 0 0 / 0.55) 78%, rgb(0 0 0 / 0.8));
+}
+
+.star {
+  animation-duration: 140s;
+  box-shadow: 0 0 2.5rem 0.3rem rgb(255 170 60 / 0.35);
+}
+
+.star::after {
+  background: radial-gradient(circle at 50% 50%, transparent 55%, rgb(120 40 0 / 0.35) 100%);
+}
+
+/* Anneaux de Saturne : moitié arrière sous la sphère, moitié avant par-dessus. */
+.ringed::before,
+.ringed::after {
+  content: "";
+  position: absolute;
+  left: -38%;
+  right: -38%;
+  top: 36%;
+  bottom: 36%;
+  border-radius: 50%;
+  border: solid rgb(214 192 146 / 0.6);
+  border-width: 0.5rem 1.1rem;
+  rotate: -16deg;
+}
+
+.ringed::before {
+  z-index: -1;
+}
+
+.ringed::after {
+  z-index: 1;
+  clip-path: inset(50% 0 0 0);
+}
+
+@keyframes spin {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.groups {
+  display: grid;
+  gap: var(--s-8);
+}
+
+.group {
+  display: grid;
+  gap: var(--s-5);
+}
+
+.planetList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: var(--s-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.planetItem {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--s-3);
+  padding: var(--s-5) var(--s-4);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-lg);
+  text-align: center;
+}
+
+.planetItem:hover,
+.planetItem:focus-within {
+  border-color: var(--or);
+}
+
+.planetName {
+  font-family: var(--font-titre);
+  font-size: var(--t-2xl);
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.planetName a {
+  color: var(--encre);
+  text-decoration: none;
+}
+
+.planetName a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-lg);
+}
+
+.planetName a:focus-visible {
+  outline: none;
+}
+
+.planetName a:focus-visible::after {
+  outline: 2px solid var(--lapis);
+  outline-offset: 3px;
+}
+
+.planetGlyph {
+  color: var(--or);
+}
+
+.planetKeywords {
+  font-family: var(--font-fell);
+  font-style: italic;
+  color: var(--encre-douce);
+}
+
+.titleGlyph {
+  color: var(--or);
+  flex: none;
+}
+
+.signTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.asideSphere {
+  padding: var(--s-5) var(--s-6);
+}
+
+.keywords {
+  max-width: var(--lecture);
+}
+
+.keywordsTitle {
+  font-family: var(--font-fell);
+  font-size: var(--t-lg);
+  margin-bottom: var(--s-2);
+}
+
+.keywords ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.keywords li {
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--filet-fort);
+  border-radius: var(--r-pill);
+  font-size: var(--t-sm);
+}
