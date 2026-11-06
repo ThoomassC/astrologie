@@ -1,0 +1,397 @@
+/*
+ * Calculateur du thème natal : un panneau (plaque filetée d'or). Formulaire en une colonne, champs de 44 px,
+ * étiquettes au-dessus, erreur puis aide sous le champ ; puis le thème : roue, tableaux, répartition, lecture, notes.
+ * Étiquettes, aides et tableaux viennent de `src/components/wheel/demo.module.css`, les détails de `text.module.css`.
+ */
+
+.calculator {
+  display: grid;
+  gap: var(--s-6);
+  padding: var(--s-6) var(--s-4);
+  background: var(--plaque);
+  border: 1px solid color-mix(in srgb, var(--or) 45%, transparent);
+  border-radius: var(--r-lg);
+}
+
+@media (min-width: 640px) {
+  .calculator {
+    padding-inline: var(--s-6);
+  }
+}
+
+/* Avant la règle sans JavaScript, qui doit l'emporter sur elle. */
+.scripted {
+  display: grid;
+  gap: var(--s-5);
+  min-width: 0;
+}
+
+/* Sans JavaScript, rien ne se calcule : le formulaire laisse la place au message (rendu par le serveur). */
+.noScript {
+  display: none;
+}
+
+@media (scripting: none) {
+  .scripted {
+    display: none;
+  }
+
+  .noScript {
+    display: block;
+    max-width: var(--lecture);
+  }
+}
+
+/* Formulaire */
+
+.form {
+  display: grid;
+  gap: var(--s-6);
+  max-width: 44rem;
+}
+
+.formTitle {
+  font-size: var(--t-2xl);
+}
+
+.group {
+  display: grid;
+  gap: var(--s-4);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.group legend {
+  padding: 0;
+  margin-bottom: var(--s-3);
+  font-family: var(--font-fell);
+  font-size: var(--t-lg);
+}
+
+.pair {
+  display: grid;
+  gap: var(--s-4);
+}
+
+@media (min-width: 560px) {
+  .pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.control {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--s-3);
+  /* --encre-douce : au moins 3:1 sur la plaque, dans les deux thèmes. */
+  border: 1px solid var(--encre-douce);
+  border-radius: var(--r-sm);
+  background: var(--fond);
+  font-variant-numeric: tabular-nums;
+}
+
+.control:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Champ en erreur : bord plus épais, et le message écrit dessous, jamais la couleur seule. */
+.control[aria-invalid="true"] {
+  border: 2px solid var(--feu);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 44px;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.check input {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: var(--or);
+}
+
+.error {
+  padding-left: var(--s-3);
+  border-left: 3px solid var(--feu);
+  color: var(--feu);
+  font-size: var(--t-sm);
+  font-weight: 600;
+}
+
+/* Avertissement : la saisie reste acceptée, mais elle a l'air d'une erreur de signe. */
+.warning {
+  padding-left: var(--s-3);
+  border-left: 3px solid var(--or);
+  font-size: var(--t-sm);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-top: var(--s-2);
+}
+
+/* Récapitulatif des erreurs, en tête du formulaire ; il reçoit le focus à l'envoi. */
+.summary {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+  border: 2px solid var(--feu);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--feu) 6%, var(--plaque));
+}
+
+.summaryTitle {
+  font-size: var(--t-lg);
+}
+
+.summary ul {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.summary li::marker {
+  color: var(--feu);
+}
+
+.summary a {
+  font-weight: 600;
+}
+
+.submitRow {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+}
+
+.privacy {
+  max-width: var(--lecture);
+  color: var(--encre-douce);
+  font-size: var(--t-sm);
+}
+
+/* État du calcul : visible pendant le calcul et en cas d'échec ; une fois le thème affiché, seulement lu. */
+.status {
+  max-width: 44rem;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-md);
+  background: var(--fond);
+  font-size: var(--t-sm);
+}
+
+.failed {
+  border: 2px solid var(--feu);
+}
+
+/* Résultat */
+
+.result {
+  display: grid;
+  gap: var(--s-7);
+  min-width: 0;
+}
+
+.resultHead {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.resultTitle {
+  font-size: var(--t-2xl);
+}
+
+.birth {
+  font-family: var(--font-fell);
+  font-style: italic;
+  font-size: var(--t-lg);
+  color: var(--encre-douce);
+}
+
+.bigThree {
+  max-width: var(--lecture);
+  font-size: var(--t-resume);
+  line-height: 1.55;
+}
+
+.block {
+  display: grid;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+.lead {
+  max-width: var(--lecture);
+}
+
+.wheel {
+  width: min(100%, 34rem);
+}
+
+.subTitle {
+  font-size: var(--t-lg);
+}
+
+.name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.glyph {
+  flex: none;
+  color: var(--or);
+}
+
+.mark {
+  display: block;
+  color: var(--encre-douce);
+  font-size: var(--t-xs);
+  font-weight: 400;
+}
+
+/* Répartition : une barre proportionnelle, et le nombre écrit à côté (lisible sans la barre). */
+.balance {
+  display: grid;
+  gap: var(--s-6);
+}
+
+@media (min-width: 720px) {
+  .balance {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.bars {
+  display: grid;
+  gap: var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr) 2ch;
+  align-items: center;
+  gap: var(--s-1) var(--s-3);
+  font-size: var(--t-sm);
+}
+
+.barName {
+  font-weight: 600;
+}
+
+.track {
+  height: 0.625rem;
+  border-radius: var(--r-pill);
+  background: var(--filet);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--pigment, var(--or));
+}
+
+.fire {
+  --pigment: var(--feu);
+}
+
+.earth {
+  --pigment: var(--terre);
+}
+
+.air {
+  --pigment: var(--air);
+}
+
+.water {
+  --pigment: var(--eau);
+}
+
+.count {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.members {
+  grid-column: 2 / -1;
+  color: var(--encre-douce);
+  font-size: var(--t-xs);
+}
+
+.dominant {
+  margin-top: var(--s-3);
+  font-size: var(--t-sm);
+}
+
+/* Lecture guidée : l'avertissement d'abord, encadré comme la note de l'astronome. */
+.reading {
+  display: grid;
+  gap: var(--s-4);
+  max-width: var(--lecture);
+}
+
+.reading ul,
+.notes {
+  display: grid;
+  gap: var(--s-3);
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.reading li::marker,
+.notes li::marker {
+  color: var(--or);
+}
+
+.caveat {
+  padding: var(--s-4) var(--s-5);
+  border: 2px solid color-mix(in srgb, var(--lapis) 55%, transparent);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--lapis) 6%, var(--plaque));
+  font-size: var(--t-sm);
+}
+
+.notes {
+  max-width: var(--lecture);
+  gap: var(--s-2);
+  color: var(--encre-douce);
+  font-size: var(--t-sm);
+}
+
+@media (forced-colors: active) {
+  .fill {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .track {
+    border: 1px solid CanvasText;
+  }
+}
