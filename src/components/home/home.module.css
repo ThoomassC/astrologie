@@ -42,8 +42,14 @@
     width: min(100%, 34rem, 36dvh);
   }
 
+  /*
+   * Le texte occupe le reste du premier écran (sous la barre et la roue, carrée) : « Positions du moment » ne commence
+   * qu'après, et un espace reste sous les boutons.
+   */
   .heroText {
     gap: var(--s-3);
+    align-content: start;
+    min-height: calc(100dvh - var(--barre) - var(--s-3) - var(--s-4) - min(100vw - 2 * var(--gouttiere), 34rem, 36dvh));
   }
 
   .heroTitle {
@@ -56,6 +62,7 @@
   }
 
   .actions {
+    justify-content: center;
     margin-top: 0;
   }
 }
