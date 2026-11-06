@@ -15,6 +15,7 @@ export const COMMON_EN: CommonContent = {
   next: "Next",
   details: "Details",
   hideDetails: "Hide details",
+  close: "Close",
   imageSource: "source",
   imageCredit: "image source and licence",
 };

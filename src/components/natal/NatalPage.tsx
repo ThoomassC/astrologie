@@ -1,4 +1,5 @@
-import { ExplainedSection, ExplainedText } from "@/components/text/ExplainedSection";
+import { ExplainedCard } from "@/components/text/ExplainedCard";
+import { ExplainedText } from "@/components/text/ExplainedSection";
 import layout from "@/components/text/layout.module.css";
 import { PageHeader } from "@/components/text/PageHeader";
 import { getNatalContent } from "@/content/natal/content";
@@ -16,10 +17,10 @@ export function NatalPage({ locale }: { locale: Locale }) {
         <ExplainedText text={content.intro} subject={content.title} locale={locale} />
         <NatalCalculator />
         <div className={layout.cards}>
-          <ExplainedSection id="methode" level={3} text={content.method} locale={locale} className={layout.card} />
-          <ExplainedSection id="lecture" level={3} text={content.reading} locale={locale} className={layout.card} />
-          <ExplainedSection id="precision" level={3} text={content.accuracy} locale={locale} className={layout.card} />
-          <ExplainedSection id="confidentialite" level={3} text={content.privacy} locale={locale} className={layout.card} />
+          <ExplainedCard id="methode" level={3} text={content.method} locale={locale} />
+          <ExplainedCard id="lecture" level={3} text={content.reading} locale={locale} />
+          <ExplainedCard id="precision" level={3} text={content.accuracy} locale={locale} />
+          <ExplainedCard id="confidentialite" level={3} text={content.privacy} locale={locale} />
         </div>
       </div>
     </main>

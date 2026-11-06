@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ExplainedCard } from "@/components/text/ExplainedCard";
 import { ExplainedSection, ExplainedText } from "@/components/text/ExplainedSection";
 import layout from "@/components/text/layout.module.css";
 import { PageHeader } from "@/components/text/PageHeader";
@@ -53,16 +54,15 @@ export function HousesPage({ locale }: { locale: Locale }) {
 
         <div className={layout.cards}>
           {HOUSE_SYSTEM_KEYS.map((key) => (
-            <ExplainedSection
+            <ExplainedCard
               key={key}
               id={`systeme-${key}`}
               level={3}
               text={content.systems[key]}
               locale={locale}
-              className={layout.card}
             />
           ))}
-          <ExplainedSection id="poles" level={3} text={content.polar} locale={locale} className={layout.card} />
+          <ExplainedCard id="poles" level={3} text={content.polar} locale={locale} />
         </div>
       </div>
     </main>

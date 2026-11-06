@@ -1,0 +1,211 @@
+/*
+ * Carte cliquable et sa fenêtre de détail. Le titre est un bouton dont la zone s'étend à toute la carte (::after) :
+ * un seul arrêt de tabulation, un nom clair (le titre), et toute la carte réagit au clic.
+ */
+
+.card {
+  position: relative;
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+  padding: var(--s-5);
+  background: var(--plaque);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-lg);
+  scroll-margin-top: calc(var(--barre) + var(--s-4));
+  transition:
+    border-color var(--duree) ease,
+    translate var(--duree) ease;
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--or) 70%, transparent);
+  translate: 0 -2px;
+}
+
+/* Le focus du bouton se voit sur toute la carte. */
+.card:has(.opener:focus-visible) {
+  outline: 2px solid var(--lapis);
+  outline-offset: 3px;
+}
+
+.title {
+  font-size: var(--t-xl);
+}
+
+.opener {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.opener:focus-visible {
+  outline: none;
+}
+
+.opener::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.summary {
+  font-size: var(--t-resume);
+  line-height: 1.55;
+  color: var(--encre);
+}
+
+/* ---------- Fenêtre ---------- */
+
+.dialog {
+  width: min(44rem, calc(100vw - 2rem));
+  max-height: min(48rem, calc(100dvh - 2rem));
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--filet-fort);
+  border-radius: var(--r-lg);
+  background: var(--plaque);
+  color: var(--encre);
+  box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.6);
+  overscroll-behavior: contain;
+}
+
+/* Le fond du site s'assombrit pour détacher la fenêtre. */
+.dialog::backdrop {
+  background: rgb(6 9 28 / 0.62);
+  backdrop-filter: blur(2px);
+}
+
+.dialog[open] {
+  animation: rise var(--duree) ease-out;
+}
+
+.dialog[open]::backdrop {
+  animation: fade var(--duree) ease-out;
+}
+
+.sheet {
+  display: grid;
+  gap: var(--s-4);
+  padding: var(--s-6);
+}
+
+/* En-tête collé en haut : « Fermer » reste à portée quand le détail défile. */
+.sheetHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin: calc(-1 * var(--s-6)) calc(-1 * var(--s-6)) 0;
+  padding: var(--s-6) var(--s-6) var(--s-3);
+  background: var(--plaque);
+}
+
+.sheetTitle {
+  font-size: var(--t-2xl);
+}
+
+.closeButton {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: calc(-1 * var(--s-2)) calc(-1 * var(--s-2)) 0 0;
+  padding: 0;
+  border: 1px solid var(--filet-fort);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--encre);
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  background: color-mix(in srgb, var(--lapis) 10%, transparent);
+}
+
+.sheetSummary {
+  font-size: var(--t-resume);
+  line-height: 1.55;
+  color: var(--encre-douce);
+}
+
+.sheetBody {
+  max-width: var(--lecture);
+  color: var(--encre);
+}
+
+.sheetBody > * + * {
+  margin-top: var(--s-4);
+}
+
+.sheetBody ul {
+  padding-left: 1.25rem;
+}
+
+.sheetBody li + li {
+  margin-top: var(--s-2);
+}
+
+.sheetBody li::marker {
+  color: var(--or);
+}
+
+@media (max-width: 40rem) {
+  .sheet {
+    padding: var(--s-5);
+  }
+
+  .sheetHead {
+    margin: calc(-1 * var(--s-5)) calc(-1 * var(--s-5)) 0;
+    padding: var(--s-5) var(--s-5) var(--s-3);
+  }
+
+  .sheetTitle {
+    font-size: var(--t-xl);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .dialog[open],
+  .dialog[open]::backdrop {
+    transition: none;
+    animation: none;
+  }
+
+  .card:hover {
+    translate: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .card:has(.opener:focus-visible) {
+    outline-color: Highlight;
+  }
+
+  .dialog::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+}

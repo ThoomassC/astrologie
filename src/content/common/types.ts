@@ -10,6 +10,8 @@ export interface CommonContent {
   /** Bouton des détails, fermé puis ouvert. */
   readonly details: string;
   readonly hideDetails: string;
+  /** Bouton qui ferme la fenêtre de détail d'une carte. */
+  readonly close: string;
   /** Mot devant le nom de l'auteur d'une image, et renvoi vers sa page source. */
   readonly imageSource: string;
   readonly imageCredit: string;

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import { ExplainedCard } from "@/components/text/ExplainedCard";
 import { ExplainedSection, ExplainedText } from "@/components/text/ExplainedSection";
 import layout from "@/components/text/layout.module.css";
 import { PageHeader } from "@/components/text/PageHeader";
@@ -125,8 +126,8 @@ export function SignsIndexPage({ locale }: { locale: Locale }) {
         </section>
 
         <div className={layout.cards}>
-          <ExplainedSection id="polarite" level={3} text={content.polarity} locale={locale} className={layout.card} />
-          <ExplainedSection id="cuspides" level={3} text={content.cusps} locale={locale} className={layout.card} />
+          <ExplainedCard id="polarite" level={3} text={content.polarity} locale={locale} />
+          <ExplainedCard id="cuspides" level={3} text={content.cusps} locale={locale} />
         </div>
       </div>
     </main>

@@ -248,6 +248,11 @@ button {
   cursor: pointer;
 }
 
+/* Pas de défilement de la page derrière une fenêtre modale ouverte. */
+html:has(dialog[open]:modal) {
+  overflow: hidden;
+}
+
 /* Listes déroulantes : une flèche fine, posée en retrait du bord arrondi (la flèche native y était rognée). */
 select:not([multiple], [size]) {
   appearance: none;

@@ -95,6 +95,10 @@ Formes douces, pas d'angle vif (préférence exprimée sur Astronomie le 28/10/2
   filetée `--filet`, « Détails » + chevron fin vers le bas qui se retourne vers le haut à l'ouverture ; nom accessible complet (« Détails :
   le mythe du Bélier ») ; ouvert, il dit « Masquer les détails ». Contenu en fondu de 200 ms (aucun en mouvement réduit).
   Sans JavaScript : natif, rien à hydrater.
+- **Carte à détail** (grilles de cartes, `ExplainedCard`) : titre et résumé seulement, sans bouton « Détails ». Toute la
+  carte est cliquable (le titre est un bouton étiré sur la carte) et ouvre une fenêtre modale native (`<dialog>`) :
+  fond du site assombri (lapis très sombre à 62 %, léger flou), en-tête collé avec « Fermer », Échap et clic sur le fond
+  la ferment, le focus revient à la carte. Au survol, filet d'or et carte qui se soulève de 2 px.
 - **Fiche** : grille `dt` / `dd` (élément, modalité, maître, exaltation, exil, chute, dates), `dt` en `--encre-douce`
   0,9375 rem, `dd` en `--encre`. Pastille de couleur devant l'élément.
 - **Estampe** : image dans un passe-partout `--plaque` de 10 px, filet d'or 1 px, `--r-md` ; légende en Fell English
