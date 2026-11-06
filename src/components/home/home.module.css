@@ -28,6 +28,38 @@
   grid-area: positions;
 }
 
+/*
+ * Téléphone : tout remonte pour que les deux boutons tiennent dans le premier écran. Roue limitée à un gros tiers de
+ * la hauteur, marges et interlignes resserrés.
+ */
+@media (max-width: 959px) {
+  .hero {
+    gap: var(--s-4);
+    padding-block: var(--s-3) var(--s-7);
+  }
+
+  .heroWheel {
+    width: min(100%, 34rem, 36dvh);
+  }
+
+  .heroText {
+    gap: var(--s-3);
+  }
+
+  .heroTitle {
+    font-size: clamp(2.5rem, 1.6rem + 4.4vw, 4.5rem);
+  }
+
+  .sentence {
+    font-size: var(--t-md);
+    line-height: 1.5;
+  }
+
+  .actions {
+    margin-top: 0;
+  }
+}
+
 @media (min-width: 960px) {
   .hero {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
