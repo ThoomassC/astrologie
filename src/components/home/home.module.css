@@ -29,8 +29,8 @@
 }
 
 /*
- * Téléphone : tout remonte pour que les deux boutons tiennent dans le premier écran. Roue limitée à un gros tiers de
- * la hauteur, marges et interlignes resserrés.
+ * Téléphone : roue en pleine largeur, puis le titre, la date, la phrase et les deux boutons, centrés dans l'espace qui
+ * reste jusqu'au bas du premier écran ; marges et interlignes resserrés.
  */
 @media (max-width: 959px) {
   .hero {
@@ -38,8 +38,9 @@
     padding-block: var(--s-3) var(--s-7);
   }
 
+  /* La roue prend toute la largeur disponible ; le texte suit dessous. */
   .heroWheel {
-    width: min(100%, 34rem, 36dvh);
+    width: min(100%, 34rem);
   }
 
   /*
@@ -50,7 +51,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--s-3);
-    min-height: calc(100dvh - var(--barre) - var(--s-3) - var(--s-4) - min(100vw - 2 * var(--gouttiere), 34rem, 36dvh));
+    min-height: calc(100dvh - var(--barre) - var(--s-3) - var(--s-4) - min(100vw - 2 * var(--gouttiere), 34rem));
   }
 
   .heroTitle {
