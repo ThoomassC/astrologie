@@ -1,0 +1,222 @@
+/* Démonstrations interactives autour de la roue : maisons, aspects. */
+
+.demo {
+  display: grid;
+  gap: var(--s-5);
+  padding: var(--s-6) var(--s-5);
+  background: var(--plaque);
+  border: 1px solid color-mix(in srgb, var(--or) 45%, transparent);
+  border-radius: var(--r-lg);
+}
+
+.demoTitle {
+  font-size: var(--t-2xl);
+}
+
+.demoIntro {
+  max-width: var(--lecture);
+  color: var(--encre-douce);
+}
+
+.demoGrid {
+  display: grid;
+  gap: var(--s-6);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .demoGrid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+}
+
+.demoWheel {
+  max-width: 34rem;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.controls {
+  display: grid;
+  gap: var(--s-5);
+}
+
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-2);
+}
+
+.fieldset legend,
+.field label {
+  font-weight: 600;
+  font-size: var(--t-sm);
+  padding: 0;
+  margin-bottom: var(--s-2);
+}
+
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.segment {
+  position: relative;
+  display: inline-flex;
+}
+
+.segment input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.segment span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--filet-fort);
+  font-size: var(--t-sm);
+}
+
+.segment input:checked + span {
+  background: var(--encre);
+  border-color: var(--encre);
+  color: var(--fond);
+}
+
+.segment input:focus-visible + span {
+  outline: 2px solid var(--lapis);
+  outline-offset: 3px;
+}
+
+.field {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.field input[type="range"] {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--or);
+}
+
+.field output {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-fell);
+  font-size: var(--t-lg);
+}
+
+.field select {
+  min-height: 44px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--encre-douce);
+  background: var(--fond);
+}
+
+.help {
+  font-size: var(--t-xs);
+  color: var(--encre-douce);
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.preset {
+  min-height: 36px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--filet-fort);
+  background: transparent;
+  font-size: var(--t-xs);
+}
+
+.preset[aria-pressed="true"] {
+  border-color: var(--or);
+  background: color-mix(in srgb, var(--or) 18%, transparent);
+}
+
+.status {
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--fond);
+  border: 1px solid var(--filet);
+  font-size: var(--t-sm);
+}
+
+.pair {
+  display: grid;
+  gap: var(--s-4);
+}
+
+@media (min-width: 520px) {
+  .pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.tableWrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.table {
+  width: 100%;
+  min-width: 22rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--filet);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  font-size: var(--t-sm);
+}
+
+.table caption {
+  caption-side: top;
+  text-align: left;
+  padding-bottom: var(--s-2);
+  font-family: var(--font-fell);
+  font-style: italic;
+  font-size: var(--t-lg);
+}
+
+.table th,
+.table td {
+  padding: var(--s-2) var(--s-3);
+  text-align: left;
+  border-bottom: 1px solid var(--filet);
+}
+
+.table tr:last-child > * {
+  border-bottom: 0;
+}
+
+.table thead th {
+  color: var(--encre-douce);
+  font-weight: 600;
+}
+
+/* Couleurs forcées : le segment choisi et le lieu enfoncé gardent une marque que le système ne repeint pas. */
+@media (forced-colors: active) {
+  .segment input:checked + span {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+
+  .preset[aria-pressed="true"] {
+    border: 2px solid Highlight;
+  }
+}

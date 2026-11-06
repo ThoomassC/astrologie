@@ -1,0 +1,194 @@
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--fond);
+  border-bottom: 1px solid var(--filet);
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Écran bas (téléphone couché, zoom fort) : la barre défile avec la page au lieu de lui prendre la hauteur. */
+@media (max-height: 30rem) {
+  .bar {
+    position: static;
+  }
+}
+
+.inner {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 var(--gouttiere);
+  min-height: var(--barre);
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--or);
+  text-decoration: none;
+  border-radius: var(--r-pill);
+  padding: var(--s-1) var(--s-2) var(--s-1) 0;
+  margin-right: auto;
+  min-width: 0;
+}
+
+.brandName {
+  font-family: var(--font-fell);
+  font-style: italic;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--encre);
+}
+
+/* À 320 px, le nom ne tient plus à côté des outils : masqué à l'œil, le lien garde son nom (aria-label). */
+@media (max-width: 22.5rem) {
+  .brandName {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+.nav {
+  display: none;
+}
+
+.links {
+  display: flex;
+  gap: var(--s-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.links a,
+.menuLinks a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-pill);
+  color: var(--encre);
+  font-size: var(--t-sm);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.links a:hover,
+.menuLinks a:hover {
+  background: color-mix(in srgb, var(--or) 14%, transparent);
+}
+
+.links a[aria-current],
+.menuLinks a[aria-current] {
+  text-decoration: underline;
+  text-decoration-color: var(--or);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.45em;
+}
+
+.links a[aria-current="page"],
+.menuLinks a[aria-current="page"] {
+  font-weight: 600;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.themeToggle {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--filet-fort);
+  background: transparent;
+  color: var(--or);
+}
+
+.themeToggle:hover {
+  background: color-mix(in srgb, var(--or) 14%, transparent);
+}
+
+.menu {
+  position: relative;
+}
+
+.menuButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--filet-fort);
+  color: var(--encre);
+  font-size: var(--t-sm);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.menuButton::-webkit-details-marker {
+  display: none;
+}
+
+.menu[open] .menuButton {
+  background: color-mix(in srgb, var(--or) 14%, transparent);
+}
+
+.menuPanel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--s-2));
+  min-width: 15rem;
+  padding: var(--s-2);
+  background: var(--plaque);
+  border: 1px solid var(--filet-fort);
+  border-radius: var(--r-lg);
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.45);
+  max-height: calc(100dvh - var(--barre) - var(--s-4));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.menuLinks {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menuLinks a {
+  width: 100%;
+  font-size: var(--t-md);
+}
+
+/* Huit onglets : ils tiennent sur une ligne dès 1 140 px (marge gardée pour l'onglet courant en gras). */
+@media (min-width: 1140px) {
+  .nav {
+    display: block;
+  }
+
+  .menu {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .links a[aria-current],
+  .menuLinks a[aria-current] {
+    text-decoration-color: Highlight;
+  }
+}

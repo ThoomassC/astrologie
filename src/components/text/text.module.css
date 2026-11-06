@@ -1,0 +1,283 @@
+/* Résumé + détails, sections de lecture, fiches, estampes, notes de l'astronome. */
+
+.section {
+  display: grid;
+  gap: var(--s-4);
+  scroll-margin-top: calc(var(--barre) + var(--s-4));
+}
+
+.sectionTitle {
+  max-width: var(--lecture);
+}
+
+h3.sectionTitle {
+  font-size: var(--t-xl);
+}
+
+.explained {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.resume {
+  max-width: var(--lecture);
+  font-size: var(--t-resume);
+  line-height: 1.55;
+  color: var(--encre);
+}
+
+/* Détails : pilule filetée ; un plus gravé qui tourne en croix à l'ouverture. */
+.details {
+  max-width: var(--lecture);
+}
+
+.summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: 0 var(--s-4) 0 var(--s-3);
+  border: 1px solid var(--filet-fort);
+  border-radius: var(--r-pill);
+  color: var(--lapis);
+  font-size: var(--t-sm);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary:hover {
+  background: color-mix(in srgb, var(--lapis) 8%, transparent);
+}
+
+.plus {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  transition: transform var(--duree) ease;
+}
+
+.plus::before,
+.plus::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: currentColor;
+  translate: -50% -50%;
+}
+
+.plus::after {
+  rotate: 90deg;
+}
+
+.details[open] > .summary .plus {
+  transform: rotate(45deg);
+}
+
+.whenOpen,
+.details[open] > .summary .whenClosed {
+  display: none;
+}
+
+.details[open] > .summary .whenOpen {
+  display: inline;
+}
+
+.panel {
+  padding-top: var(--s-4);
+  color: var(--encre);
+}
+
+.details[open] > .panel {
+  animation: open var(--duree) ease-out;
+}
+
+.panel > * + * {
+  margin-top: var(--s-4);
+}
+
+.panel ul {
+  margin-block: var(--s-4) 0;
+  padding-left: 1.25rem;
+}
+
+.panel li + li {
+  margin-top: var(--s-2);
+}
+
+.panel li::marker {
+  color: var(--or);
+}
+
+@keyframes open {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+/* En-tête de page. */
+.pageHead {
+  display: grid;
+  gap: var(--s-4);
+  padding-block: var(--s-7) var(--s-6);
+}
+
+.pageTitle {
+  font-size: var(--t-hero);
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+.lead {
+  max-width: var(--lecture);
+  font-family: var(--font-fell);
+  font-style: italic;
+  font-size: var(--t-xl);
+  line-height: 1.35;
+  color: var(--encre-douce);
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-sm);
+  color: var(--encre-douce);
+}
+
+.breadcrumb li + li::before {
+  content: "/";
+  margin-right: var(--s-2);
+  color: var(--or);
+}
+
+.breadcrumb a {
+  color: var(--encre-douce);
+}
+
+/* Fiche : grille dt / dd. */
+.fiche {
+  display: grid;
+  grid-template-columns: minmax(7rem, auto) 1fr;
+  gap: var(--s-2) var(--s-5);
+  margin: 0;
+  padding: var(--s-5);
+  background: var(--plaque);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-lg);
+}
+
+.fiche dt {
+  color: var(--encre-douce);
+  font-size: var(--t-sm);
+  padding-top: 0.1rem;
+}
+
+.fiche dd {
+  margin: 0;
+  color: var(--encre);
+}
+
+/* Estampe : image dans un passe-partout, filet d'or, légende en Fell italique, crédit discret. */
+.estampe {
+  margin: 0;
+  display: grid;
+  gap: var(--s-3);
+}
+
+.mat {
+  padding: 10px;
+  background: var(--plaque);
+  border: 1px solid color-mix(in srgb, var(--or) 55%, transparent);
+  border-radius: var(--r-md);
+}
+
+.mat img {
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--r-md) - 8px);
+}
+
+.caption {
+  font-family: var(--font-fell);
+  font-style: italic;
+  font-size: var(--t-md);
+  line-height: 1.4;
+  color: var(--encre);
+}
+
+.credit {
+  display: block;
+  margin-top: var(--s-1);
+  font-size: var(--t-xs);
+  line-height: 1.45;
+  color: var(--encre-douce);
+}
+
+.credit a {
+  color: var(--encre-douce);
+}
+
+/* Note de l'astronome. */
+.note {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-3) var(--s-4);
+  align-items: start;
+  max-width: var(--lecture);
+  padding: var(--s-4) var(--s-5);
+  border: 1px solid color-mix(in srgb, var(--lapis) 45%, transparent);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--lapis) 5%, var(--plaque));
+  font-size: var(--t-sm);
+}
+
+.noteIcon {
+  color: var(--lapis);
+  margin-top: 0.15rem;
+}
+
+.noteTitle {
+  font-family: var(--font-fell);
+  font-size: var(--t-lg);
+  line-height: 1.25;
+  margin-bottom: var(--s-1);
+}
+
+/* Pastille d'élément. */
+.pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.pastille::before {
+  content: "";
+  width: 0.62em;
+  height: 0.62em;
+  border-radius: 50%;
+  background: var(--pastille, var(--or));
+}
+
+@media (forced-colors: active) {
+  .summary {
+    border-color: ButtonText;
+  }
+
+  .pastille::before {
+    background: CanvasText;
+  }
+}

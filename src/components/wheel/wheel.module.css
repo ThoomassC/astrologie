@@ -1,0 +1,229 @@
+/* Roue zodiacale gravée : traits d'or d'un pixel à toute taille (vector-effect), pigments des éléments en voile. */
+
+.wheel {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--font-texte);
+  user-select: none;
+}
+
+.engraving {
+  fill: none;
+  stroke: var(--or);
+  stroke-width: 1.25;
+}
+
+.engraving * {
+  vector-effect: non-scaling-stroke;
+}
+
+.ticks {
+  stroke-width: 0.8;
+  opacity: 0.85;
+}
+
+.faint {
+  stroke: var(--filet-fort);
+}
+
+.sector {
+  stroke: none;
+}
+
+.fire {
+  fill: color-mix(in srgb, var(--feu) 9%, transparent);
+}
+
+.earth {
+  fill: color-mix(in srgb, var(--terre) 9%, transparent);
+}
+
+.air {
+  fill: color-mix(in srgb, var(--air) 10%, transparent);
+}
+
+.water {
+  fill: color-mix(in srgb, var(--eau) 9%, transparent);
+}
+
+.highlight {
+  fill: color-mix(in srgb, var(--or) 26%, transparent);
+}
+
+.signGlyph {
+  color: var(--or);
+}
+
+.signGlyphStrong {
+  color: var(--encre);
+}
+
+.cusp,
+.angleCusp {
+  fill: none;
+  stroke: var(--encre-douce);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.angleCusp {
+  stroke: var(--encre);
+  stroke-width: 1.6;
+}
+
+.houseNumber {
+  fill: var(--encre-douce);
+  font-size: 24px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.angleLabels text {
+  fill: var(--encre);
+  font-size: 22px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.aspects line {
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Nature d'un aspect : couleur et motif du trait, pour ne pas dépendre de la seule couleur (harmonieux : plein ;
+   tendu : tirets ; mineur : pointillés). */
+.harmonious {
+  stroke: var(--eau);
+}
+
+.tense {
+  stroke: var(--feu);
+  stroke-dasharray: 10 5;
+}
+
+.neutral {
+  stroke: var(--or);
+}
+
+.minor {
+  stroke: var(--encre-douce);
+  stroke-dasharray: 0.5 4;
+  stroke-linecap: round;
+}
+
+/* Astres : cachés et rangés à gauche tant qu'ils ne sont pas connus, puis ils glissent jusqu'à leur degré. */
+.points .orbit {
+  transform: rotate(var(--rot));
+  transform-origin: 500px 500px;
+  opacity: 0;
+  transition:
+    transform 1.2s cubic-bezier(0.22, 0.7, 0.2, 1),
+    opacity 0.5s ease-out;
+}
+
+.points .upright {
+  transform: rotate(calc(-1 * var(--rot)));
+  transition: transform 1.2s cubic-bezier(0.22, 0.7, 0.2, 1);
+}
+
+.points.shown .orbit {
+  opacity: 1;
+}
+
+.marks,
+.aspects {
+  opacity: 0;
+  transition: opacity 0.6s ease-out 0.9s;
+}
+
+.shown .marks,
+.aspects.shown {
+  opacity: 1;
+}
+
+.disc {
+  fill: var(--plaque);
+  stroke: color-mix(in srgb, var(--or) 60%, transparent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.pointGlyph {
+  color: var(--encre);
+}
+
+.trueTick {
+  stroke: var(--encre);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.leader {
+  stroke: var(--encre-douce);
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+}
+
+.retro {
+  fill: var(--feu);
+  font-size: 18px;
+  font-weight: 700;
+  font-style: italic;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .points .orbit,
+  .points .upright {
+    transition: opacity 0.4s ease-out;
+  }
+
+  .marks,
+  .aspects {
+    transition: opacity 0.4s ease-out;
+  }
+}
+
+@media (forced-colors: active) {
+  .engraving,
+  .cusp,
+  .angleCusp,
+  .trueTick,
+  .leader,
+  .aspects line {
+    stroke: CanvasText;
+  }
+
+  .signGlyph,
+  .signGlyphStrong,
+  .pointGlyph {
+    color: CanvasText;
+  }
+
+  .sector {
+    fill: none;
+  }
+
+  .highlight {
+    fill: Highlight;
+  }
+
+  .signGlyphStrong {
+    color: HighlightText;
+  }
+
+  .disc {
+    fill: Canvas;
+    stroke: CanvasText;
+  }
+
+  .retro {
+    fill: CanvasText;
+  }
+
+  .houseNumber,
+  .angleLabels text {
+    fill: CanvasText;
+  }
+}

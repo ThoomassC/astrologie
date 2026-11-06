@@ -1,49 +1,351 @@
+/*
+ * Styles globaux, partagés par toutes les pages : jetons des deux thèmes (jour, nuit), typographie, focus, éléments
+ * de base. Direction et règles : design-system/astrologie/MASTER.md.
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Thème jour : papier azuré, encre de lapis, or sombre. */
+  --fond: #e9ecf3;
+  --plaque: #f6f7fb;
+  --encre: #18215b;
+  --encre-douce: #4b5583;
+  --or: #8e6b1c;
+  --or-texte: #7a5a12;
+  --lapis: #2b44c4;
+  --sur-or: #ffffff;
+  --filet: rgb(24 33 91 / 0.16);
+  --filet-fort: rgb(24 33 91 / 0.3);
+  --voile: rgb(233 236 243 / 0.9);
+  --feu: #b23a22;
+  --terre: #2f6b3c;
+  --air: #8a6a0e;
+  --eau: #1f5f8c;
+  --papier-opacite: 0.32;
+  --papier-fusion: multiply;
+  color-scheme: light;
+
+  /* Typographie */
+  --font-titre: var(--font-canon), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-fell: var(--font-fell-english), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-texte: var(--font-atkinson), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --t-xs: 0.8125rem;
+  --t-sm: 0.9375rem;
+  --t-md: 1.0625rem;
+  --t-resume: 1.1875rem;
+  --t-lg: 1.25rem;
+  --t-xl: 1.625rem;
+  --t-2xl: 2.25rem;
+  --t-3xl: 3.25rem;
+  --t-hero: clamp(3rem, 1.6rem + 4.4vw, 6rem);
+
+  /* Espacements */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+
+  /* Gabarit */
+  --page: 72rem;
+  --lecture: 40rem;
+  --manchette: 16rem;
+  --gouttiere: 1rem;
+  --barre: 4rem;
+
+  /* Arrondis : formes douces, jamais d'angle vif. */
+  --r-pill: 999px;
+  --r-lg: 24px;
+  --r-md: 16px;
+  --r-sm: 10px;
+  --r-xs: 6px;
+
+  --duree: 200ms;
+}
+
+/* Thème nuit : choisi par la bascule, ou par le système quand rien n'est choisi. */
+:root[data-theme="nuit"] {
+  --fond: #0c1332;
+  --plaque: #141c46;
+  --encre: #ece6d6;
+  --encre-douce: #a3abca;
+  --or: #d7b663;
+  --or-texte: #ddbd6e;
+  --lapis: #a9b9ff;
+  --sur-or: #0c1332;
+  --filet: rgb(236 230 214 / 0.14);
+  --filet-fort: rgb(236 230 214 / 0.28);
+  --voile: rgb(12 19 50 / 0.9);
+  --feu: #f08a6e;
+  --terre: #86c493;
+  --air: #e8c760;
+  --eau: #7dbceb;
+  --papier-opacite: 0.07;
+  --papier-fusion: soft-light;
+  color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="jour"]) {
+    --fond: #0c1332;
+    --plaque: #141c46;
+    --encre: #ece6d6;
+    --encre-douce: #a3abca;
+    --or: #d7b663;
+    --or-texte: #ddbd6e;
+    --lapis: #a9b9ff;
+  --sur-or: #0c1332;
+    --filet: rgb(236 230 214 / 0.14);
+    --filet-fort: rgb(236 230 214 / 0.28);
+    --voile: rgb(12 19 50 / 0.9);
+    --feu: #f08a6e;
+    --terre: #86c493;
+    --air: #e8c760;
+    --eau: #7dbceb;
+    --papier-opacite: 0.07;
+    --papier-fusion: soft-light;
+    color-scheme: dark;
   }
 }
 
+@media (min-width: 640px) {
+  :root {
+    --gouttiere: 1.5rem;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html {
-  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--barre) + var(--s-4));
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  min-height: 100%;
+  margin: 0;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--fond);
+  color: var(--encre);
+  font-family: var(--font-texte);
+  font-size: var(--t-md);
+  line-height: 1.6;
+  font-kerning: normal;
+  font-variant-ligatures: common-ligatures;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
+/* Grain du papier : une texture CC0 répétée, fondue dans le fond, sous tout le reste. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--texture-papier);
+  background-size: 512px 512px;
+  opacity: var(--papier-opacite);
+  mix-blend-mode: var(--papier-fusion);
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+h1,
+h2 {
+  font-family: var(--font-titre);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0;
   margin: 0;
+  text-wrap: balance;
+}
+
+h3,
+h4 {
+  font-family: var(--font-fell);
+  font-weight: 400;
+  line-height: 1.25;
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--t-3xl);
+}
+
+h2 {
+  font-size: var(--t-2xl);
+}
+
+h3 {
+  font-size: var(--t-xl);
+}
+
+h4 {
+  font-size: var(--t-lg);
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+p + p {
+  margin-top: var(--s-4);
 }
 
 a {
+  color: var(--lapis);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
   color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+abbr[title] {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+  cursor: help;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lapis);
+  outline-offset: 3px;
+}
+
+a:focus-visible {
+  border-radius: var(--r-xs);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--or) 35%, transparent);
+  color: var(--encre);
+}
+
+/* Lu par les lecteurs d'écran, invisible à l'œil. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (forced-colors: active) {
+  body::before {
+    display: none;
+  }
+}
+
+/* Lien d'évitement : hors de l'écran, il glisse en haut à gauche au focus. */
+.skip {
+  position: absolute;
+  left: var(--gouttiere);
+  top: -100px;
+  z-index: 50;
+  padding: var(--s-3) var(--s-5);
+  border-radius: var(--r-pill);
+  background: var(--plaque);
+  color: var(--encre);
+  border: 1px solid var(--filet-fort);
+}
+
+.skip:focus {
+  top: calc(env(safe-area-inset-top, 0px) + var(--s-2));
+}
+
+main:focus {
+  outline: none;
+}
+
+/* Boutons-liens : pilule pleine d'or (action principale), pilule filetée (secondaire). */
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 48px;
+  padding: 0 var(--s-5);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--or);
+  background: var(--or);
+  color: var(--sur-or);
+  font-weight: 600;
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+.bouton:hover {
+  background: color-mix(in srgb, var(--or) 86%, var(--encre));
+  text-decoration: none;
+}
+
+.bouton-second {
+  background: transparent;
+  color: var(--encre);
+  border-color: var(--filet-fort);
+}
+
+.bouton-second:hover {
+  background: color-mix(in srgb, var(--or) 14%, transparent);
 }

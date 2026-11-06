@@ -1,0 +1,7 @@
+.main {
+  max-width: var(--lecture);
+  margin: 0 auto;
+  padding: var(--s-9) var(--gouttiere) var(--s-7);
+  display: grid;
+  gap: var(--s-4);
+}
