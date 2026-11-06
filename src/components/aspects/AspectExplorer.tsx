@@ -6,6 +6,8 @@ import { InfoTip } from "@/components/text/InfoTip";
 import styles from "@/components/wheel/demo.module.css";
 import { useSettledValue } from "@/components/wheel/useSettledValue";
 import { ZodiacWheel } from "@/components/wheel/ZodiacWheel";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 import { POINT_NAMES } from "@/i18n/names";
 import { formatPosition } from "@/i18n/positions";
 import { ASPECTS } from "@/lib/astro/aspectData";
@@ -13,9 +15,10 @@ import { type Aspect, findAspects } from "@/lib/astro/aspects";
 import { MAJOR_ASPECT_KEYS, PLANET_KEYS, type PlanetKey } from "@/lib/astro/keys";
 import { norm360, separation } from "@/lib/astro/zodiac";
 import { aspectPath } from "@/lib/site/routes";
-import { ASPECTS_STRINGS as S } from "./aspects.strings";
+import { ASPECTS_STRINGS } from "./aspects.strings";
 
-const decimal = (n: number) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(n);
+const decimal = (n: number, locale: Locale) =>
+  new Intl.NumberFormat(INTL_LOCALE[locale], { maximumFractionDigits: 1 }).format(n);
 
 interface Pick {
   planet: PlanetKey;
@@ -36,14 +39,17 @@ function aspectBetween(first: Pick, second: Pick): Aspect | undefined {
 
 /** Résumé parlé : les deux astres, l'aspect trouvé (son nom mène à sa section), son orbe et sa nature. */
 function Status({ first, second }: { first: Pick; second: Pick }) {
+  const locale = useLocale();
+  const S = ASPECTS_STRINGS[locale];
+  const names = POINT_NAMES[locale];
   const aspect = aspectBetween(first, second);
-  const pair = S.pair(POINT_NAMES[first.planet].name, POINT_NAMES[second.planet].name);
-  if (!aspect) return <>{`${pair}${S.none(decimal(separation(first.longitude, second.longitude)))}`}</>;
-  const detail = aspect.orb < 0.05 ? S.exact : S.found(decimal(aspect.orb), decimal(aspect.maxOrb));
+  const pair = S.pair(names[first.planet].name, names[second.planet].name);
+  if (!aspect) return <>{`${pair}${S.none(decimal(separation(first.longitude, second.longitude), locale))}`}</>;
+  const detail = aspect.orb < 0.05 ? S.exact : S.found(decimal(aspect.orb, locale), decimal(aspect.maxOrb, locale));
   return (
     <>
       {pair}
-      <Link href={aspectPath(aspect.key)}>{S.aspectNames[aspect.key]}</Link>
+      <Link href={aspectPath(aspect.key, locale)}>{S.aspectNames[aspect.key]}</Link>
       {`${detail} ${S.nature(S.natures[ASPECTS[aspect.key].nature])}`}
     </>
   );
@@ -55,6 +61,8 @@ function Status({ first, second }: { first: Pick; second: Pick }) {
  * d'un aspect majeur), résumé parlé une fois le curseur arrêté.
  */
 export function AspectExplorer() {
+  const locale = useLocale();
+  const S = ASPECTS_STRINGS[locale];
   const id = useId();
   const [first, setFirst] = useState<Pick>({ planet: "sun", longitude: 10 });
   const [second, setSecond] = useState<Pick>({ planet: "moon", longitude: 128 });
@@ -76,7 +84,7 @@ export function AspectExplorer() {
         >
           {PLANET_KEYS.filter((planet) => planet !== other).map((planet) => (
             <option key={planet} value={planet}>
-              {POINT_NAMES[planet].name}
+              {POINT_NAMES[locale][planet].name}
             </option>
           ))}
         </select>
@@ -91,10 +99,10 @@ export function AspectExplorer() {
           step={0.5}
           value={pick.longitude}
           onChange={(event) => set({ ...pick, longitude: Number(event.target.value) })}
-          aria-valuetext={formatPosition(pick.longitude)}
+          aria-valuetext={formatPosition(pick.longitude, locale)}
         />
         <output htmlFor={`${id}-position-${n}`} aria-hidden="true">
-          {formatPosition(pick.longitude)}
+          {formatPosition(pick.longitude, locale)}
         </output>
       </div>
     </fieldset>
@@ -113,6 +121,7 @@ export function AspectExplorer() {
           <ZodiacWheel
             titleId={`${id}-roue`}
             title={S.wheelTitle}
+            locale={locale}
             descriptionId={`${id}-etat`}
             points={[
               { key: first.planet, longitude: first.longitude },
@@ -134,12 +143,12 @@ export function AspectExplorer() {
                 className={styles.preset}
                 onClick={() => setSecond({ ...second, longitude: norm360(first.longitude + ASPECTS[key].angle) })}
               >
-                {S.place(S.aspectNames[key].toLowerCase())}
+                {S.place(S.aspectNames[key].toLocaleLowerCase(INTL_LOCALE[locale]))}
               </button>
             ))}
           </div>
           <p className={styles.field}>
-            <output>{S.separation(decimal(gap))}</output>
+            <output>{S.separation(decimal(gap, locale))}</output>
           </p>
           <p id={`${id}-etat`} className={styles.status} aria-live="polite">
             <Status first={settledFirst} second={settledSecond} />

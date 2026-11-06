@@ -8,24 +8,25 @@ import { getCommonContent } from "@/content/common/content";
 import { getPlanetsContent } from "@/content/planets/content";
 import { PLANET_SECTION_IDS } from "@/content/planets/types";
 import { getUiContent } from "@/content/ui/content";
+import type { Locale } from "@/i18n/locales";
 import { PLANET_GROUP_NAMES, POINT_NAMES, SIGN_NAMES } from "@/i18n/names";
 import type { PlanetKey, SignKey } from "@/lib/astro/keys";
 import { PLANET_KEYS } from "@/lib/astro/keys";
 import { PLANETS } from "@/lib/astro/planets";
 import { domiciles, exaltationOf, oppositeSign } from "@/lib/astro/signs";
 import { MAIN_ID } from "@/lib/site/ids";
-import { planetPath, SECTION_PATHS, signPath } from "@/lib/site/routes";
+import { planetPath, sectionPath, signPath } from "@/lib/site/routes";
 import { PlanetSphere } from "./PlanetSphere";
 import styles from "./planets.module.css";
 import signStyles from "@/components/signs/signs.module.css";
 
-function SignList({ signs }: { signs: readonly SignKey[] }) {
+function SignList({ signs, locale }: { signs: readonly SignKey[]; locale: Locale }) {
   return (
     <>
       {signs.map((sign, i) => (
         <span key={sign}>
           {i > 0 ? ", " : null}
-          <Link href={signPath(sign)}>{SIGN_NAMES[sign].name}</Link>
+          <Link href={signPath(sign, locale)}>{SIGN_NAMES[locale][sign].name}</Link>
         </span>
       ))}
     </>
@@ -33,13 +34,14 @@ function SignList({ signs }: { signs: readonly SignKey[] }) {
 }
 
 /** Fiche d'un astre : en-tête, sphère et fiche en manchette, résumé, domaines, six sections à déplier. */
-export function PlanetPage({ planet }: { planet: PlanetKey }) {
-  const content = getPlanetsContent();
+export function PlanetPage({ planet, locale }: { planet: PlanetKey; locale: Locale }) {
+  const content = getPlanetsContent(locale);
   const text = content.planets[planet];
-  const ui = getUiContent().planets;
-  const common = getCommonContent();
+  const ui = getUiContent(locale).planets;
+  const common = getCommonContent(locale);
   const data = PLANETS[planet];
-  const name = POINT_NAMES[planet].name;
+  const names = POINT_NAMES[locale];
+  const name = names[planet].name;
   const homes = domiciles(planet);
   const allHomes = [...new Set([...homes.traditional, ...homes.modern])];
   const exaltation = exaltationOf(planet);
@@ -49,17 +51,17 @@ export function PlanetPage({ planet }: { planet: PlanetKey }) {
   const period = (days: number) => (days >= 730 ? ui.years(days / 365.25) : ui.days(days));
 
   const fiche = [
-    { label: ui.fiche.group, value: PLANET_GROUP_NAMES[data.group] },
+    { label: ui.fiche.group, value: PLANET_GROUP_NAMES[locale][data.group] },
     { label: ui.fiche.sidereal, value: period(data.siderealPeriodDays) },
     ...(data.synodicPeriodDays ? [{ label: ui.fiche.synodic, value: period(data.synodicPeriodDays) }] : []),
     { label: ui.fiche.perSign, value: period(data.meanDaysPerSign) },
     { label: ui.fiche.retrograde, value: data.retrogradeDays ? ui.retrogradeEvery(data.retrogradeDays) : ui.fiche.never },
-    { label: ui.fiche.domiciles, value: allHomes.length > 0 ? <SignList signs={allHomes} /> : ui.fiche.none },
+    { label: ui.fiche.domiciles, value: allHomes.length > 0 ? <SignList signs={allHomes} locale={locale} /> : ui.fiche.none },
     {
       label: ui.fiche.exaltation,
       value: exaltation ? (
         <>
-          <Link href={signPath(exaltation.sign)}>{SIGN_NAMES[exaltation.sign].name}</Link> ({exaltation.degree}°)
+          <Link href={signPath(exaltation.sign, locale)}>{SIGN_NAMES[locale][exaltation.sign].name}</Link> ({exaltation.degree}°)
         </>
       ) : (
         ui.fiche.none
@@ -67,11 +69,11 @@ export function PlanetPage({ planet }: { planet: PlanetKey }) {
     },
     {
       label: ui.fiche.detriment,
-      value: allHomes.length > 0 ? <SignList signs={allHomes.map(oppositeSign)} /> : ui.fiche.none,
+      value: allHomes.length > 0 ? <SignList signs={allHomes.map(oppositeSign)} locale={locale} /> : ui.fiche.none,
     },
     {
       label: ui.fiche.fall,
-      value: exaltation ? <SignList signs={[oppositeSign(exaltation.sign)]} /> : ui.fiche.none,
+      value: exaltation ? <SignList signs={[oppositeSign(exaltation.sign)]} locale={locale} /> : ui.fiche.none,
     },
     { label: ui.fiche.discovery, value: data.discoveryYear ? String(data.discoveryYear) : ui.fiche.ancient },
   ];
@@ -87,9 +89,10 @@ export function PlanetPage({ planet }: { planet: PlanetKey }) {
         }
         lead={text.tagline}
         crumbs={[
-          { label: common.breadcrumbHome, href: SECTION_PATHS.home },
-          { label: content.index.title, href: SECTION_PATHS.planets },
+          { label: common.breadcrumbHome, href: sectionPath("home", locale) },
+          { label: content.index.title, href: sectionPath("planets", locale) },
         ]}
+        locale={locale}
       />
       <div className={layout.withAside}>
         <aside className={layout.aside} aria-label={ui.fiche.label}>
@@ -99,7 +102,7 @@ export function PlanetPage({ planet }: { planet: PlanetKey }) {
           <Fiche rows={fiche} />
         </aside>
         <div className={layout.stack}>
-          <ExplainedText text={text.intro} subject={name} />
+          <ExplainedText text={text.intro} subject={name} locale={locale} />
           <div className={styles.keywords}>
             <ul>
               {text.keywords.map((k) => (
@@ -108,19 +111,19 @@ export function PlanetPage({ planet }: { planet: PlanetKey }) {
             </ul>
           </div>
           {PLANET_SECTION_IDS.map((id) => (
-            <ExplainedSection key={id} id={id} text={text.sections[id]} />
+            <ExplainedSection key={id} id={id} text={text.sections[id]} locale={locale} />
           ))}
           <nav className={signStyles.prevNext} aria-label={content.index.title}>
-            <Link href={planetPath(previous)} rel="prev">
+            <Link href={planetPath(previous, locale)} rel="prev">
               <span className={signStyles.prevNextLabel}>{ui.previous}</span>
               <span className={signStyles.prevNextName}>
-                <Glyph name={previous} size={22} /> {POINT_NAMES[previous].name}
+                <Glyph name={previous} size={22} /> {names[previous].name}
               </span>
             </Link>
-            <Link href={planetPath(next)} rel="next" className={signStyles.nextLink}>
+            <Link href={planetPath(next, locale)} rel="next" className={signStyles.nextLink}>
               <span className={signStyles.prevNextLabel}>{ui.next}</span>
               <span className={signStyles.prevNextName}>
-                {POINT_NAMES[next].name} <Glyph name={next} size={22} />
+                {names[next].name} <Glyph name={next} size={22} />
               </span>
             </Link>
           </nav>

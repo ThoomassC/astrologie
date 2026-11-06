@@ -1,0 +1,38 @@
+/*
+ * Page introuvable des adresses qu'aucune route ne sert : une colonne sur le papier, la même phrase dans les deux
+ * langues, chacune avec son chemin vers l'accueil. Jetons de globals.css ; polices de repli du système (pas de
+ * next/font sur cette page légère).
+ */
+.page {
+  width: 100%;
+  max-width: var(--lecture);
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--s-9)) var(--gouttiere)
+    calc(env(safe-area-inset-bottom, 0px) + var(--s-7));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.code {
+  margin: 0 0 var(--s-3);
+  color: var(--or);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Une version par langue, séparées par un filet : aucune ne prend le pas sur l'autre. */
+.version + .version {
+  margin-top: var(--s-6);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--filet);
+}
+
+.title {
+  margin: 0 0 var(--s-2);
+}
+
+.text {
+  margin: 0 0 var(--s-4);
+}

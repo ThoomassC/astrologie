@@ -4,7 +4,10 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ValidBirthInput } from "@/lib/astro/birthInput";
 import { BirthForm } from "./BirthForm";
-import { NATAL_STRINGS as S } from "./natal.strings";
+import { NATAL_STRINGS } from "./natal.strings";
+import { dateValue, segmentsOf, typeDate, typeTime } from "@/components/form/testing";
+
+const S = NATAL_STRINGS.fr;
 
 // Sans les globales de Vitest, Testing Library ne démonte pas seul les rendus entre deux tests.
 afterEach(cleanup);
@@ -16,11 +19,13 @@ function setup() {
   const onValid = vi.fn<(input: ValidBirthInput) => void>();
   const user = userEvent.setup();
   const view = render(<BirthForm onValid={onValid} onWarmUp={() => undefined} dateRef={createRef()} />);
-  const field = (label: string) => screen.getByLabelText(label);
+  /** Un champ par son étiquette ; pour la date et l'heure, en segments, leur premier segment. */
+  const field = (label: string) =>
+    label === S.date || label === S.time ? segmentsOf(label)[0] : screen.getByLabelText(label);
   /** Une naissance à Paris ; `time: null` laisse l'heure vide. */
   const fillParis = async (date: string, time: string | null) => {
-    await user.type(field(S.date), date);
-    if (time !== null) await user.type(field(S.time), time);
+    await typeDate(user, S.date, date);
+    if (time !== null) await typeTime(user, S.time, time);
     await user.selectOptions(field(S.city), "paris");
   };
   /** « Autre lieu », fuseau pré-rempli remplacé par `zone`. */
@@ -67,7 +72,7 @@ describe("BirthForm — confidentialité", () => {
 describe("BirthForm — erreurs", () => {
   it("devrait signaler la date manquante : récapitulatif focalisé et lu, lien vers le champ, message relié", async () => {
     const { user, field, submit, summary, onValid } = setup();
-    await user.type(field(S.time), "14:30");
+    await typeTime(user, S.time, "14:30");
     await user.selectOptions(field(S.city), "paris");
     await submit();
 
@@ -85,8 +90,8 @@ describe("BirthForm — erreurs", () => {
 
   it("devrait signaler une latitude non valide sous son champ, puis la revalider en direct", async () => {
     const { user, field, fillManual, submit, summary, noSummary, onValid } = setup();
-    await user.type(field(S.date), "1990-07-14");
-    await user.type(field(S.time), "08:15");
+    await typeDate(user, S.date, "1990-07-14");
+    await typeTime(user, S.time, "08:15");
     await fillManual("quarante-huit", "2,35", "Europe/Paris");
     await submit();
 
@@ -106,8 +111,8 @@ describe("BirthForm — erreurs", () => {
 
   it("ne devrait rien reprocher à un champ apparu après l'envoi tant qu'on ne l'a pas quitté", async () => {
     const { user, field, submit, summary } = setup();
-    await user.type(field(S.date), "1990-07-14");
-    await user.type(field(S.time), "08:15");
+    await typeDate(user, S.date, "1990-07-14");
+    await typeTime(user, S.time, "08:15");
     await submit();
     expect(within(summary()).getAllByRole("link").map((link) => link.textContent)).toEqual([S.errors.city.required]);
 
@@ -141,7 +146,7 @@ describe("BirthForm — erreurs", () => {
 
   it("devrait refuser, sans l'heure, un jour sauté par le fuseau (Apia, 30 décembre 2011)", async () => {
     const { user, field, fillManual, submit } = setup();
-    await user.type(field(S.date), "2011-12-30");
+    await typeDate(user, S.date, "2011-12-30");
     await user.click(screen.getByRole("checkbox", { name: S.timeUnknown }));
     await fillManual("-13,83", "-171,76", "Pacific/Apia");
     await submit();
@@ -213,7 +218,7 @@ describe("BirthForm — heure inconnue, effacement", () => {
     await fillParis("2024-03-31", "02:30");
     await submit();
     await user.click(screen.getByRole("button", { name: S.clear }));
-    expect(field(S.date)).toHaveValue("");
+    expect(dateValue(S.date)).toBe("--");
     expect(field(S.city)).toHaveValue("");
     expect(noSummary()).toBeNull();
     expect(field(S.date)).toHaveFocus();

@@ -45,6 +45,12 @@
   color: var(--encre);
 }
 
+/* Les icônes gardent leur taille quand la barre se resserre. */
+.brand svg,
+.menuButton svg {
+  flex: none;
+}
+
 /* À 320 px, le nom ne tient plus à côté des outils : masqué à l'œil, le lien garde son nom (aria-label). */
 @media (max-width: 22.5rem) {
   .brandName {
@@ -121,6 +127,110 @@
   background: color-mix(in srgb, var(--or) 14%, transparent);
 }
 
+/*
+ * Bascule de langue : une pilule de 44 px de haut, deux drapeaux, et un bouton glissant (filet d'or, fond doré léger)
+ * sous le drapeau de la langue affichée. L'autre drapeau, atténué, s'avive au survol : c'est lui que vise le lien.
+ */
+.langSwitch {
+  display: inline-flex;
+  align-items: stretch;
+  height: 44px;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--filet-fort);
+  background: transparent;
+  text-decoration: none;
+}
+
+.langSwitch:hover {
+  background: color-mix(in srgb, var(--or) 8%, transparent);
+}
+
+.langSwitch:focus-visible,
+.langLine:focus-visible {
+  outline-offset: 2px;
+}
+
+.langTrack {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  flex: none;
+  height: 100%;
+  min-height: 34px;
+}
+
+.langKnob {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 50%;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--or);
+  background: color-mix(in srgb, var(--or) 18%, transparent);
+  transition: transform 180ms ease-out;
+}
+
+.langTrack[data-active="en"] .langKnob {
+  transform: translateX(100%);
+}
+
+.langFlag {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+}
+
+.langFlag:not([data-current]) .flag {
+  opacity: 0.55;
+  filter: saturate(0.6);
+  transition: opacity 150ms ease-out, filter 150ms ease-out;
+}
+
+.langSwitch:hover .langFlag:not([data-current]) .flag,
+.langLine:hover .langFlag:not([data-current]) .flag {
+  opacity: 1;
+  filter: none;
+}
+
+.flag {
+  display: block;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--filet);
+}
+
+/* Ligne de la langue dans le menu replié : la même pilule, plus petite, et le nom de la version visée. */
+.langLine {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 44px;
+  margin-top: var(--s-2);
+  padding: var(--s-1) var(--s-3);
+  border-top: 1px solid var(--filet);
+  border-radius: var(--r-pill);
+  color: var(--encre);
+  font-size: var(--t-md);
+  text-decoration: none;
+}
+
+.langLine:hover {
+  background: color-mix(in srgb, var(--or) 14%, transparent);
+}
+
+.langLine .langTrack {
+  height: 30px;
+  min-height: 30px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .langKnob,
+  .langFlag:not([data-current]) .flag {
+    transition: none;
+  }
+}
+
 .menu {
   position: relative;
 }
@@ -175,8 +285,11 @@
   font-size: var(--t-md);
 }
 
-/* Huit onglets : ils tiennent sur une ligne dès 1 140 px (marge gardée pour l'onglet courant en gras). */
-@media (min-width: 1140px) {
+/*
+ * Huit onglets : ils tiennent sur une ligne dès 1 140 px (marge gardée pour l'onglet courant en gras) ; la bascule de
+ * langue prend environ 90 px de plus à côté de celle du thème, d'où 1 230 px.
+ */
+@media (min-width: 1230px) {
   .nav {
     display: block;
   }
@@ -190,5 +303,42 @@
   .links a[aria-current],
   .menuLinks a[aria-current] {
     text-decoration-color: Highlight;
+  }
+
+  .langKnob {
+    border-color: Highlight;
+  }
+}
+
+/*
+ * Sous 26 rem (téléphones), la bascule de langue prend sa place : « Menu » devient un bouton rond à l'icône seule (le
+ * mot reste lu par les lecteurs d'écran), les espaces se resserrent.
+ */
+@media (max-width: 26rem) {
+  .inner {
+    gap: var(--s-2);
+  }
+
+  .tools {
+    gap: var(--s-1);
+  }
+
+  .brandName {
+    font-size: 1.3rem;
+  }
+
+  .menuButton {
+    justify-content: center;
+    width: 44px;
+    padding: 0;
+  }
+
+  .menuLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }

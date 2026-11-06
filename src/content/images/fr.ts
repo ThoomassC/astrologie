@@ -5,7 +5,7 @@ const CC0 = { license: "CC0 1.0", licenseHref: "https://creativecommons.org/publ
 const CC_BY = { license: "CC BY 4.0", licenseHref: "https://creativecommons.org/licenses/by/4.0/deed.fr" } as const;
 
 const URANIA = "Urania's Mirror, Londres, 1825, planche gravée et coloriée à la main ; exemplaire de la Library of Congress, restauration numérique d'Adam Cuerden";
-const COMMONS = "https://commons.wikimedia.org/wiki/File :";
+const COMMONS = "https://commons.wikimedia.org/wiki/File:";
 
 function urania(title: string, file: string): ImageCredit {
   return { title, author: "Sidney Hall", origin: URANIA, ...PD, pageHref: `${COMMONS}${file}` };

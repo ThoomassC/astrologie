@@ -1,4 +1,5 @@
 import { formatMonthDay } from "@/i18n/dates";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 import { type LocalDateTime, localToUtc, wallClockMs } from "@/lib/astro/time";
 import type { ClockJump } from "./natal.strings";
 
@@ -9,7 +10,6 @@ import type { ClockJump } from "./natal.strings";
 
 const MINUS = "−";
 const MINUTE_MS = 60_000;
-const DECIMAL = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 4 });
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -30,19 +30,20 @@ export function shortOffset(seconds: number): string {
   return `${sign}${h}${m || s ? `:${pad(m)}` : ""}${s ? `:${pad(s)}` : ""}`;
 }
 
-/** « 14:30 ». */
-export function clockTime({ hour, minute }: { hour: number; minute: number }): string {
-  return `${pad(hour)}:${pad(minute)}`;
+/** « 14:30 » en français (24 heures) ; « 2:30 PM » en anglais (12 heures, AM et PM). */
+export function clockTime({ hour, minute }: { hour: number; minute: number }, locale: Locale = "fr"): string {
+  if (locale === "fr") return `${pad(hour)}:${pad(minute)}`;
+  return `${hour % 12 === 0 ? 12 : hour % 12}:${pad(minute)}\u00a0${hour < 12 ? "AM" : "PM"}`;
 }
 
-/** « 3 juillet 2024 », « 1er mai 1990 ». */
-export function longDate(date: { year: number; month: number; day: number }): string {
-  return `${formatMonthDay(date)} ${date.year}`;
+/** « 3 juillet 2024 », « 1er mai 1990 » ; « 3 July 2024 », « 1 May 1990 ». */
+export function longDate(date: { year: number; month: number; day: number }, locale: Locale): string {
+  return `${formatMonthDay(date, locale)} ${date.year}`;
 }
 
-/** « 48,85 » : un nombre à la française, quatre décimales au plus. */
-export function decimal(n: number): string {
-  return DECIMAL.format(n);
+/** « 48,85 » en français, « 48.85 » en anglais : quatre décimales au plus. */
+export function decimal(n: number, locale: Locale): string {
+  return new Intl.NumberFormat(INTL_LOCALE[locale], { maximumFractionDigits: 4 }).format(n);
 }
 
 /** Champs d'une heure de l'horloge lue comme si elle était UTC : l'inverse de `wallClockMs`. */
@@ -58,9 +59,9 @@ function fromWallClock(ms: number): LocalDateTime {
 }
 
 /** Date et heure UTC d'un instant : « 3 juillet 2024 » et « 12:30 ». */
-export function utcDateTime(utcMs: number): { date: string; time: string } {
+export function utcDateTime(utcMs: number, locale: Locale): { date: string; time: string } {
   const at = fromWallClock(utcMs);
-  return { date: longDate(at), time: clockTime(at) };
+  return { date: longDate(at, locale), time: clockTime(at, locale) };
 }
 
 /** Au-delà, un saut n'est plus un changement d'heure mais de fuseau (Apia a sauté un jour entier en 2011). */
@@ -77,6 +78,7 @@ export function clockJump(
   zone: string,
   offsetBeforeSeconds: number,
   offsetAfterSeconds: number,
+  locale: Locale = "fr",
 ): ClockJump | null {
   const gapSeconds = offsetAfterSeconds - offsetBeforeSeconds;
   if (gapSeconds <= 0 || gapSeconds > MAX_JUMP_SECONDS || gapSeconds % 60 !== 0) return null;
@@ -87,7 +89,7 @@ export function clockJump(
     if (localToUtc(fromWallClock(previous), zone).kind !== "nonexistent") break;
     start = previous;
   }
-  const at = (ms: number) => clockTime(fromWallClock(ms));
+  const at = (ms: number) => clockTime(fromWallClock(ms), locale);
   return { from: at(start), to: at(start + gapSeconds * 1000), time: at(typed), shifted: at(typed + gapSeconds * 1000) };
 }
 

@@ -3,21 +3,23 @@
 import { useId, useState } from "react";
 import { useSettledValue } from "@/components/wheel/useSettledValue";
 import { ZodiacWheel } from "@/components/wheel/ZodiacWheel";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 import { SIGN_NAMES } from "@/i18n/names";
 import { formatPosition } from "@/i18n/positions";
 import { computeAngles } from "@/lib/astro/angles";
 import { computeHouses } from "@/lib/astro/houses";
 import { HOUSE_SYSTEM_KEYS, type HouseSystemKey } from "@/lib/astro/keys";
 import { signOf } from "@/lib/astro/zodiac";
-import { HOUSES_STRINGS as S } from "./houses.strings";
+import { HOUSES_STRINGS } from "./houses.strings";
 import { InfoTip } from "@/components/text/InfoTip";
 import styles from "@/components/wheel/demo.module.css";
 
 /** Obliquité de l'écliptique, à peu près celle d'aujourd'hui. */
 const OBLIQUITY = 23.44;
 
-const decimal = (n: number, digits = 1) =>
-  new Intl.NumberFormat("fr-FR", { maximumFractionDigits: digits, minimumFractionDigits: digits }).format(n);
+const decimal = (n: number, locale: Locale, digits = 1) =>
+  new Intl.NumberFormat(INTL_LOCALE[locale], { maximumFractionDigits: digits, minimumFractionDigits: digits }).format(n);
 
 /**
  * Démonstration des systèmes de maisons : un système, une latitude, un moment de la journée (l'heure sidérale). Calcul
@@ -25,6 +27,8 @@ const decimal = (n: number, digits = 1) =>
  * résultat une fois le curseur arrêté (pas à chaque cran).
  */
 export function HouseSystemsDemo() {
+  const locale = useLocale();
+  const S = HOUSES_STRINGS[locale];
   const id = useId();
   const [system, setSystem] = useState<HouseSystemKey>("placidus");
   const [latitude, setLatitude] = useState(48.9);
@@ -33,13 +37,13 @@ export function HouseSystemsDemo() {
   const frame = { ramcDeg: ramc, obliquityDeg: OBLIQUITY, latitudeDeg: latitude };
   const angles = computeAngles(frame);
   const houses = computeHouses(system, frame, angles);
-  const latitudeText = S.latitudeValue(decimal(Math.abs(latitude)), latitude >= 0 ? "N" : "S");
+  const latitudeText = S.latitudeValue(decimal(Math.abs(latitude), locale), latitude >= 0 ? "N" : "S");
   const usedName = S.systems[houses.used];
   const hours = Math.floor(ramc / 15);
   const minutes = Math.round((ramc / 15 - hours) * 60) % 60;
-  const skyText = S.skyValue(SIGN_NAMES[signOf(angles.ascendant)].name, hours, minutes);
+  const skyText = S.skyValue(SIGN_NAMES[locale][signOf(angles.ascendant)].name, hours, minutes);
   const status = useSettledValue(
-    houses.fallback ? S.fallback(latitudeText) : S.summary(usedName, formatPosition(angles.ascendant), formatPosition(angles.midheaven)),
+    houses.fallback ? S.fallback(latitudeText) : S.summary(usedName, formatPosition(angles.ascendant, locale), formatPosition(angles.midheaven, locale)),
   );
 
   return (
@@ -55,6 +59,7 @@ export function HouseSystemsDemo() {
           <ZodiacWheel
             titleId={`${id}-roue`}
             title={S.wheelTitle(usedName, latitudeText)}
+            locale={locale}
             descriptionId={`${id}-table`}
             leftLongitude={angles.ascendant}
             cusps={houses.cusps}
@@ -156,8 +161,8 @@ export function HouseSystemsDemo() {
               return (
                 <tr key={i}>
                   <th scope="row">{S.house(i + 1)}</th>
-                  <td>{formatPosition(cusp)}</td>
-                  <td>{S.size(decimal(size))}</td>
+                  <td>{formatPosition(cusp, locale)}</td>
+                  <td>{S.size(decimal(size, locale))}</td>
                 </tr>
               );
             })}

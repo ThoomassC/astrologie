@@ -4,8 +4,11 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { POINT_NAMES } from "@/i18n/names";
-import { NATAL_STRINGS as S } from "./natal.strings";
+import { NATAL_STRINGS } from "./natal.strings";
 import { NatalCalculator } from "./NatalCalculator";
+import { dateValue, segmentsOf, typeDate, typeTime } from "@/components/form/testing";
+
+const S = NATAL_STRINGS.fr;
 
 // Sans les globales de Vitest, Testing Library ne démonte pas seul les rendus entre deux tests.
 afterEach(() => {
@@ -22,10 +25,12 @@ const plain = (text: string) => text.replace(/\s+/g, " ").trim();
 function setup() {
   const user = userEvent.setup();
   render(<NatalCalculator />);
-  const field = (label: string) => screen.getByLabelText(label);
+  /** Un champ par son étiquette ; pour la date et l'heure, en segments, leur premier segment. */
+  const field = (label: string) =>
+    label === S.date || label === S.time ? segmentsOf(label)[0] : screen.getByLabelText(label);
   const fillParis = async (date: string, time: string | null) => {
-    await user.type(field(S.date), date);
-    if (time !== null) await user.type(field(S.time), time);
+    await typeDate(user, S.date, date);
+    if (time !== null) await typeTime(user, S.time, time);
     await user.selectOptions(field(S.city), "paris");
   };
   const submit = () => user.click(screen.getByRole("button", { name: S.submit }));
@@ -47,13 +52,13 @@ describe("NatalCalculator — calcul réel", () => {
 
     const table = screen.getByRole("table", { name: S.positionsTitle });
     expect(within(table).getAllByRole("row")).toHaveLength(12);
-    expect(within(table).getByRole("link", { name: POINT_NAMES.sun.name })).toBeInTheDocument();
+    expect(within(table).getByRole("link", { name: POINT_NAMES.fr.sun.name })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: S.wheelLabel(true) })).toHaveAttribute("aria-describedby", table.id);
 
     await user.click(screen.getAllByRole("button", { name: S.editInput })[0]);
     expect(screen.queryByRole("heading", { level: 2, name: S.resultTitle })).toBeNull();
     expect(field(S.date)).toHaveFocus();
-    expect(field(S.date)).toHaveValue("2024-07-03");
+    expect(dateValue(S.date)).toBe("2024-07-03");
   }, 20_000);
 
   it("devrait dresser le thème sans l'heure : ni colonne des maisons, ni angles", async () => {

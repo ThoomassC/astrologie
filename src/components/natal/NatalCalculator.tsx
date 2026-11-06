@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { Locale } from "@/i18n/locales";
 import { SIGN_NAMES } from "@/i18n/names";
 import type { ValidBirthInput } from "@/lib/astro/birthInput";
 import type { NatalChart } from "@/lib/astro/chart";
@@ -9,7 +11,7 @@ import type { SignKey } from "@/lib/astro/keys";
 import { signOf } from "@/lib/astro/zodiac";
 import { BirthForm } from "./BirthForm";
 import { ChartResult } from "./ChartResult";
-import { NATAL_STRINGS as S } from "./natal.strings";
+import { NATAL_STRINGS } from "./natal.strings";
 import styles from "./natal.module.css";
 
 /** Le moteur d'éphémérides (~21 Ko gzip) n'arrive qu'à la demande : au premier focus du formulaire, ou à l'envoi. */
@@ -25,12 +27,14 @@ type Phase =
   | { status: "result"; chart: NatalChart };
 
 /** La phrase de synthèse en texte seul, pour l'annonce. */
-function spokenSummary({ positions: { sun, moon }, angles }: NatalChart): string {
-  const name = (sign: SignKey, uncertain: boolean) => `${SIGN_NAMES[sign].name}${uncertain ? S.uncertainInline : ""}`;
+function spokenSummary({ positions: { sun, moon }, angles }: NatalChart, locale: Locale): string {
+  const S = NATAL_STRINGS[locale];
+  const signs = SIGN_NAMES[locale];
+  const name = (sign: SignKey, uncertain: boolean) => `${signs[sign].name}${uncertain ? S.uncertainInline : ""}`;
   return S.bigThree(
     name(sun.sign, sun.signUncertain),
     name(moon.sign, moon.signUncertain),
-    angles ? SIGN_NAMES[signOf(angles.ascendant)].name : null,
+    angles ? signs[signOf(angles.ascendant)].name : null,
   ).join("");
 }
 
@@ -40,6 +44,8 @@ function spokenSummary({ positions: { sun, moon }, angles }: NatalChart): string
  * ni adresse, ni stockage. Sans JavaScript, un message remplace le formulaire (`@media (scripting: none)`).
  */
 export function NatalCalculator() {
+  const locale = useLocale();
+  const S = NATAL_STRINGS[locale];
   const [phase, setPhase] = useState<Phase>({ status: "form" });
   /* Numéro du dernier calcul demandé : un calcul plus ancien qui finit après lui est ignoré. */
   const request = useRef(0);
@@ -87,7 +93,7 @@ export function NatalCalculator() {
         : phase.status === "computeFailed"
           ? S.computeFailed
           : phase.status === "result"
-          ? S.done(spokenSummary(phase.chart))
+          ? S.done(spokenSummary(phase.chart, locale))
           : "";
   const statusClass =
     phase.status === "computing"

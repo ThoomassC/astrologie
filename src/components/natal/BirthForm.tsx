@@ -3,6 +3,10 @@ import { flushSync } from "react-dom";
 import text from "@/components/text/text.module.css";
 import { InfoTip } from "@/components/text/InfoTip";
 import demo from "@/components/wheel/demo.module.css";
+import { DateField } from "@/components/form/DateField";
+import { TimeField } from "@/components/form/TimeField";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { Locale } from "@/i18n/locales";
 import { HOUSE_SYSTEM_NAMES } from "@/i18n/names";
 import {
   type BirthFormValues,
@@ -15,7 +19,7 @@ import { isTimeZone } from "@/lib/astro/time";
 import { CITIES, isCityKey } from "@/lib/geo/cities";
 import { CITY_STRINGS } from "./cities.strings";
 import { clockJump, coordinatePair, decimal, readDecimal, shortOffset, standardOffset } from "./format";
-import { type ClockJump, type FixedBirthError, NATAL_STRINGS as S } from "./natal.strings";
+import { type ClockJump, type FixedBirthError, NATAL_STRINGS, type NatalStrings } from "./natal.strings";
 import { CITY_GROUPS, timeZoneSuggestions } from "./places";
 import styles from "./natal.module.css";
 
@@ -88,7 +92,7 @@ const yearOf = (v: FormValues) => {
 /** Fuseau de cet appareil, pour pré-remplir un lieu saisi à la main. */
 const deviceTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-function fixedMessage(error: FixedBirthError): string {
+function fixedMessage(error: FixedBirthError, S: NatalStrings): string {
   switch (error.field) {
     case "date":
       return S.errors.date[error.code];
@@ -109,7 +113,7 @@ function fixedMessage(error: FixedBirthError): string {
 }
 
 /** Heures de l'horloge autour d'un saut, d'après la saisie (que le parseur vient d'accepter, au saut près). */
-function jumpOf(v: FormValues, offsetBefore: number, offsetAfter: number): ClockJump | null {
+function jumpOf(v: FormValues, offsetBefore: number, offsetAfter: number, locale: Locale): ClockJump | null {
   const zone = zoneOf(v);
   const date = DATE_PATTERN.exec(v.date.trim());
   const time = TIME_PATTERN.exec(v.time.trim());
@@ -121,25 +125,25 @@ function jumpOf(v: FormValues, offsetBefore: number, offsetAfter: number): Clock
     hour: Number(time[1]),
     minute: Number(time[2]),
   };
-  return clockJump(local, zone, offsetBefore, offsetAfter);
+  return clockJump(local, zone, offsetBefore, offsetAfter, locale);
 }
 
-function messageOf(error: BirthInputError, values: FormValues): string {
+function messageOf(error: BirthInputError, values: FormValues, S: NatalStrings, locale: Locale): string {
   if (error.field === "time") {
     if (error.code === "ambiguous") return S.ambiguous;
     if (error.code === "nonexistent") {
-      return S.nonexistent(jumpOf(values, error.offsetBeforeSeconds, error.offsetAfterSeconds));
+      return S.nonexistent(jumpOf(values, error.offsetBeforeSeconds, error.offsetAfterSeconds, locale));
     }
     return S.errors.time[error.code];
   }
-  return fixedMessage(error);
+  return fixedMessage(error, S);
 }
 
 /**
  * Longitude dont le signe semble inversé : loin du méridien du fuseau (heure d'hiver × 15°), alors que son opposée en
  * serait plus proche. Bordeaux (−0,58° pour un fuseau à +1 h) n'est pas suspecte ; Fort-de-France à +61,53° l'est.
  */
-function longitudeSuspicion(v: FormValues): { east: boolean; zone: string; suggestion: string } | null {
+function longitudeSuspicion(v: FormValues, locale: Locale): { east: boolean; zone: string; suggestion: string } | null {
   const zone = zoneOf(v);
   const longitude = readDecimal(v.longitude);
   if (v.place !== OTHER_PLACE || zone === null || longitude === null || longitude === 0) return null;
@@ -149,7 +153,7 @@ function longitudeSuspicion(v: FormValues): { east: boolean; zone: string; sugge
   const gap = Math.abs(longitude - meridian);
   if (gap <= SIGN_SUSPICION_DEG || Math.abs(-longitude - meridian) >= gap) return null;
   const opposite = -longitude;
-  return { east: longitude > 0, zone, suggestion: `${opposite < 0 ? "−" : ""}${decimal(Math.abs(opposite))}` };
+  return { east: longitude > 0, zone, suggestion: `${opposite < 0 ? "−" : ""}${decimal(Math.abs(opposite), locale)}` };
 }
 
 interface BirthFormProps {
@@ -167,6 +171,8 @@ interface BirthFormProps {
  * revalidé en direct que s'il avait déjà une erreur ou qu'on l'a quitté (erreurs calculées au rendu, jamais copiées).
  */
 export function BirthForm({ onValid, onWarmUp, dateRef }: BirthFormProps) {
+  const locale = useLocale();
+  const S = NATAL_STRINGS[locale];
   const id = useId();
   const [values, setValues] = useState<FormValues>(EMPTY);
   const [attempted, setAttempted] = useState(false);
@@ -180,7 +186,7 @@ export function BirthForm({ onValid, onWarmUp, dateRef }: BirthFormProps) {
   const errors: readonly BirthInputError[] =
     parsed !== null && !parsed.ok ? parsed.errors.filter((e) => flagged.has(e.field) || touched.has(e.field)) : [];
   const errorOf = (field: FieldKey) => errors.find((error) => error.field === field);
-  const suspicion = longitudeSuspicion(values);
+  const suspicion = longitudeSuspicion(values, locale);
 
   const fieldId = (field: FieldKey) => `${id}-${field}`;
   const errorId = (field: FieldKey) => `${id}-${field}-erreur`;
@@ -190,12 +196,15 @@ export function BirthForm({ onValid, onWarmUp, dateRef }: BirthFormProps) {
   const firstChoiceId = `${id}-premier-passage`;
   const describedBy = (field: FieldKey, ...help: string[]) =>
     [...(errorOf(field) ? [errorId(field)] : []), ...help].join(" ") || undefined;
+  const touch = (field: FieldKey) => setTouched((current) => (current.has(field) ? current : new Set(current).add(field)));
   /** Attributs communs d'un champ : identifiant, état d'erreur, et la sortie du champ qui le fait revalider. */
   const control = (field: FieldKey) => ({
     id: fieldId(field),
     "aria-invalid": errorOf(field) ? true : undefined,
-    onBlur: () => setTouched((current) => (current.has(field) ? current : new Set(current).add(field))),
+    onBlur: () => touch(field),
   });
+
+  const labelId = (field: FieldKey) => `${id}-${field}-etiquette`;
 
   const set = <K extends keyof FormValues>(key: K, value: FormValues[K]) =>
     setValues((current) => ({ ...current, [key]: value }));
@@ -279,7 +288,7 @@ export function BirthForm({ onValid, onWarmUp, dateRef }: BirthFormProps) {
     return (
       <>
         <p id={errorId(field)} className={styles.error}>
-          {messageOf(error, values)}
+          {messageOf(error, values, S, locale)}
         </p>
         {choices}
       </>
@@ -326,7 +335,7 @@ export function BirthForm({ onValid, onWarmUp, dateRef }: BirthFormProps) {
               return (
                 <li key={error.field}>
                   <a href={`#${target}`} onClick={(event) => followError(event, target, error.field)}>
-                    {messageOf(error, values)}
+                    {messageOf(error, values, S, locale)}
                   </a>
                 </li>
               );
@@ -342,41 +351,49 @@ export function BirthForm({ onValid, onWarmUp, dateRef }: BirthFormProps) {
           <div className={styles.pair}>
             <div className={demo.field}>
               <div className={styles.labelRow}>
-                <label htmlFor={fieldId("date")}>{S.date}</label>
+                <label id={labelId("date")} htmlFor={fieldId("date")}>
+                  {S.date}
+                </label>
                 <InfoTip subject={S.date} id={helpId("date")}>
                   {S.dateHelp}
                 </InfoTip>
               </div>
-              <input
-                {...control("date")}
-                ref={dateRef}
-                className={styles.control}
-                type="date"
+              <DateField
+                onLeave={() => touch("date")}
+                id={fieldId("date")}
+                labelId={labelId("date")}
+                inputRef={dateRef}
+                locale={locale}
                 min={MIN_DATE}
                 max={MAX_DATE}
                 required
+                invalid={errorOf("date") !== undefined}
                 value={values.date}
-                onChange={(event) => set("date", event.target.value)}
-                aria-describedby={describedBy("date", helpId("date"))}
+                onChange={(value) => set("date", value)}
+                describedBy={describedBy("date", helpId("date"))}
               />
               {errorText("date")}
             </div>
             <div className={demo.field}>
               <div className={styles.labelRow}>
-                <label htmlFor={fieldId("time")}>{S.time}</label>
+                <label id={labelId("time")} htmlFor={fieldId("time")}>
+                  {S.time}
+                </label>
                 <InfoTip subject={S.time} id={helpId("time")}>
                   {S.timeHelp}
                 </InfoTip>
               </div>
-              <input
-                {...control("time")}
-                className={styles.control}
-                type="time"
+              <TimeField
+                onLeave={() => touch("time")}
+                id={fieldId("time")}
+                labelId={labelId("time")}
+                locale={locale}
                 required={!values.timeUnknown}
                 disabled={values.timeUnknown}
+                invalid={errorOf("time") !== undefined}
                 value={values.time}
-                onChange={(event) => set("time", event.target.value)}
-                aria-describedby={describedBy("time", helpId("time"))}
+                onChange={(value) => set("time", value)}
+                describedBy={describedBy("time", helpId("time"))}
               />
               {errorText("time")}
             </div>
@@ -416,11 +433,11 @@ export function BirthForm({ onValid, onWarmUp, dateRef }: BirthFormProps) {
                 aria-describedby={describedBy("city", helpId("city"))}
               >
                 <option value="">{S.cityChoose}</option>
-                {CITY_GROUPS.map((group) => (
+                {CITY_GROUPS[locale].map((group) => (
                   <optgroup key={group.country} label={group.label}>
                     {group.cities.map((key) => (
                       <option key={key} value={key}>
-                        {CITY_STRINGS.cities[key]}
+                        {CITY_STRINGS[locale].cities[key]}
                       </option>
                     ))}
                   </optgroup>
@@ -533,7 +550,7 @@ export function BirthForm({ onValid, onWarmUp, dateRef }: BirthFormProps) {
                 >
                   {HOUSE_SYSTEM_KEYS.map((key) => (
                     <option key={key} value={key}>
-                      {HOUSE_SYSTEM_NAMES[key]}
+                      {HOUSE_SYSTEM_NAMES[locale][key]}
                     </option>
                   ))}
                 </select>

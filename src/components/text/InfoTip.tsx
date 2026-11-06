@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, type ReactNode, useId } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { INFO_STRINGS } from "./info.strings";
 import styles from "./text.module.css";
 
@@ -10,6 +11,7 @@ import styles from "./text.module.css";
  * où le navigateur connaît l'ancrage CSS, au centre de l'écran sinon. `id` facultatif : pour `aria-describedby`.
  */
 export function InfoTip({ subject, children, id }: { subject: string; children: ReactNode; id?: string }) {
+  const { label } = INFO_STRINGS[useLocale()];
   const own = useId();
   const panelId = id ?? `${own}-info`;
   const anchor = `--info-${own.replace(/[^a-zA-Z0-9_-]/g, "")}`;
@@ -19,7 +21,7 @@ export function InfoTip({ subject, children, id }: { subject: string; children: 
         type="button"
         className={styles.info}
         popoverTarget={panelId}
-        aria-label={INFO_STRINGS.label(subject)}
+        aria-label={label(subject)}
         style={{ anchorName: anchor } as CSSProperties}
       >
         i

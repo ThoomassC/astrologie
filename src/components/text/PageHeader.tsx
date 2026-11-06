@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { getCommonContent } from "@/content/common/content";
+import type { Locale } from "@/i18n/locales";
 import styles from "./text.module.css";
 
 export interface Crumb {
@@ -13,9 +14,11 @@ export function PageHeader({
   title,
   lead,
   crumbs,
+  locale,
   children,
 }: {
   title: ReactNode;
+  locale: Locale;
   lead?: string;
   crumbs?: readonly Crumb[];
   children?: ReactNode;
@@ -23,7 +26,7 @@ export function PageHeader({
   return (
     <header className={styles.pageHead}>
       {crumbs && crumbs.length > 0 ? (
-        <nav className={styles.breadcrumb} aria-label={getCommonContent().breadcrumbLabel}>
+        <nav className={styles.breadcrumb} aria-label={getCommonContent(locale).breadcrumbLabel}>
           <ol>
             {crumbs.map((crumb) => (
               <li key={crumb.href}>

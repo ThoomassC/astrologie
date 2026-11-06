@@ -17,7 +17,7 @@ function Page() {
   return (
     <>
       <header>
-        <a href="/lexique">Lexique</a>
+        <a href="#lexique">Lexique</a>
       </header>
       <main id={MAIN_ID} tabIndex={-1}>
         <article id="retrogradation" tabIndex={-1}>
@@ -39,21 +39,21 @@ function navigate(rerender: (ui: React.ReactNode) => void, url: string) {
 describe("FocusOnNavigation", () => {
   it("devrait donner le focus à la cible de l'ancre quand l'adresse en désigne une", () => {
     const { rerender, getByText } = render(<Page />);
-    navigate(rerender, "/lexique#retrogradation");
+    navigate(rerender, "/fr/lexique#retrogradation");
     expect(document.activeElement).toBe(getByText("Rétrogradation"));
   });
 
   it("devrait sortir le focus de la barre vers le contenu après un clic sur un onglet", () => {
     const { rerender, getByText, container } = render(<Page />);
     getByText("Lexique").focus();
-    navigate(rerender, "/lexique");
+    navigate(rerender, "/fr/lexique");
     expect(document.activeElement).toBe(container.querySelector("main"));
   });
 
   it("devrait laisser le focus qu'une page a posé dans son contenu", () => {
     const { rerender, getByText } = render(<Page />);
     getByText("Dans la page").focus();
-    navigate(rerender, "/lexique");
+    navigate(rerender, "/fr/lexique");
     expect(document.activeElement).toBe(getByText("Dans la page"));
   });
 

@@ -1,6 +1,6 @@
 # Astrologie
 
-Site pédagogique en français sur l'astrologie, frère du site [Astronomie](https://astronomie.vercel.app). Il présente l'astrologie comme ce qu'elle est : une **tradition symbolique** née à Babylone, dont il explique les notions (signes, planètes, maisons, aspects), l'histoire, et ce qu'en dit la science. Partout, un **résumé simple** d'abord, puis des **détails** à la demande. Le thème natal se calcule **dans le navigateur** : les données de naissance ne quittent jamais l'appareil.
+Site pédagogique sur l'astrologie, en français et en anglais, frère du site [Astronomie](https://astronomie.vercel.app). Il présente l'astrologie comme ce qu'elle est : une **tradition symbolique** née à Babylone, dont il explique les notions (signes, planètes, maisons, aspects), l'histoire, et ce qu'en dit la science. Partout, un **résumé simple** d'abord, puis des **détails** à la demande. Le thème natal se calcule **dans le navigateur** : les données de naissance ne quittent jamais l'appareil.
 
 ## Ce que fait le site
 
@@ -40,7 +40,7 @@ Site pédagogique en français sur l'astrologie, frère du site [Astronomie](htt
 
 ### Partout
 
-- Barre commune (marque, onglets ; « Menu » à 1 080 px et moins), bascule **jour / nuit** (le choix est gardé ; sans choix, le site suit le système), pied de page commun (renvois, contacts de l'auteur, site frère, code source).
+- Barre commune (marque, onglets ; « Menu » sous 1 230 px), bascule **jour / nuit** (le choix est gardé ; sans choix, le site suit le système), bascule **français / anglais**, pied de page commun (renvois, contacts de l'auteur, site frère, code source).
 - Lien d'évitement, parcours complet au clavier, focus rendu au contenu après chaque navigation, mouvement réduit respecté, couleurs forcées prises en compte. Sans JavaScript, tout reste lisible : les détails s'ouvrent nativement (`<details>`), seuls le ciel du jour, les démonstrations et le calcul du thème demandent JavaScript.
 
 ## Pile technique
@@ -70,9 +70,11 @@ Puis ouvrir http://localhost:3000.
 
 ```
 src/
-  app/                pages : accueil, signes/ (+ [slug]), planetes/ (+ [slug]), maisons/, aspects/, theme-natal/,
-                      histoire/, science/, lexique/, a-propos/ ; layout racine, 404, globals.css
-  content/            textes (serveur seulement), un dossier par domaine : types.ts, fr.ts, content.ts
+  app/[lang]/         pages, dans chaque langue : accueil, signes/ (+ [slug]), planetes/ (+ [slug]), maisons/,
+                      aspects/, theme-natal/, histoire/, science/, lexique/, a-propos/ ; layout racine, 404
+  app/                404 globale, plan du site, robots.txt, globals.css
+  proxy.ts            négociation de la langue des adresses sans langue
+  content/            textes (serveur seulement), un dossier par domaine : types.ts, fr.ts, en.ts, content.ts
   components/
     site/             barre, menu replié, bascule de thème, pied de page, lien d'évitement, focus
     text/             résumé + détails, en-tête de page, fiche, estampe, note de l'astronome, gabarits
@@ -85,20 +87,30 @@ src/
     wheel/            géométrie de la roue, écartement des glyphes
     geo/              villes proposées par le formulaire
     site/             adresses, thème, images, viewport
-  i18n/               noms affichés, positions et dates en français, gardes des textes
+  i18n/               langues, négociation, métadonnées, noms affichés, positions et dates, gardes des textes
   assets/images/      cartes des signes, planches de l'histoire, cartes des astres, papier
 design-system/        direction artistique et jetons (MASTER.md)
 docs/adr/             décisions d'architecture
 scripts/              correcteur de typographie française
 ```
 
-## Textes
+## Langues
 
-- **Contenus serveur** (`src/content/<domaine>/`) : `types.ts` (forme), `fr.ts` (texte seul), `content.ts` (`get<Domaine>Content()`). Ils ne partent jamais au navigateur : aucun module client ne doit les importer (garde `src/i18n/boundaries.test.ts`).
-- **Chaînes client** (`*.strings.ts`, à côté des composants client qui les lisent) : courtes, 20 000 caractères au plus en tout (garde `stringsBudget.test.ts`).
+- **Adresses** : chaque page existe en français et en anglais, sous `/fr/…` et `/en/…` ; les segments et les ancres sont les mêmes dans les deux langues (`/en/signes/belier`, `/fr/maisons#maison-4`). Les chemins se fabriquent par `src/lib/site/routes.ts`, langue obligatoire (`signPath(sign, locale)`, `sectionPath("natal", locale)`).
+- **Pages statiques** : le layout `src/app/[lang]/layout.tsx` déclare les deux langues (`generateStaticParams`) et `ensureStatic` ; il pose `<html lang>` et le fournisseur `LocaleProvider`. Une langue inconnue donne la 404 ; une adresse qu'aucune route ne sert, la 404 globale bilingue (`src/app/global-not-found.tsx`).
+- **Négociation** : `src/proxy.ts` ne voit que les adresses **sans** langue (`/`, `/signes/belier`) et les renvoie (307) vers la même adresse préfixée de la langue préférée : cookie `lang` s'il est valide, sinon `Accept-Language`, sinon le français. Il ne pose jamais de cookie.
+- **Bascule** : dans la barre, à côté de la bascule de thème (et dans le menu replié), une pilule à deux drapeaux, lien vers la même page dans l'autre langue (sans JavaScript aussi) ; au clic, elle pose le cookie `lang` (un an, `SameSite=Lax`) et garde l'ancre affichée.
+- **Métadonnées** (`src/i18n/metadata.ts`) : adresse canonique, `hreflang` des deux langues et `x-default` (l'adresse sans langue) ; le plan du site couvre les deux langues.
+
+### Où vivent les textes
+
+- **Contenus serveur** (`src/content/<domaine>/`) : `types.ts` (forme), `fr.ts` et `en.ts` (texte seul), `content.ts` (`get<Domaine>Content(locale)`). Lus seulement par des composants serveur, qui reçoivent la langue en prop depuis la page ; aucun module client ne doit les importer (garde `src/i18n/boundaries.test.ts`).
+- **Chaînes client** (`*.strings.ts`, à côté des composants client qui les lisent) : `X_STRINGS: Readonly<Record<Locale, …>>`, lue par `X_STRINGS[useLocale()]` ; 20 000 caractères au plus par langue (garde `stringsBudget.test.ts`).
+- **Noms** (`src/i18n/names.ts`) : signes, astres, aspects, éléments, mois…, indexés par la langue (`SIGN_NAMES[locale].aries` : « Bélier », « Aries ») ; positions et dates par `formatPosition(l, locale)` et `formatMonthDay(d, locale)`.
 - **Résumé + détails** : chaque notion est un `Explained` (`summary` d'une à trois phrases, 320 caractères au plus ; `details` en paragraphes et listes), rendu par `ExplainedSection`.
-- **Ton** : vouvoiement ; l'astrologie est présentée « selon la tradition », jamais comme un savoir établi (garde `completeness.test.ts`).
-- **Typographie française** sur tout texte affiché : espace fine insécable (U+202F) entre les milliers et avant « ; ! ? », espace insécable (U+00A0) avant « : » et dans les guillemets « ». Le script `scripts/typographie.mjs` les pose dans les littéraux ; la garde `frenchTypography.test.ts` les vérifie partout.
+- **Ton** : vouvoiement en français, « you » et orthographe britannique en anglais (formats `en-GB`) ; l'astrologie est présentée « selon la tradition », jamais comme un savoir établi.
+- **Typographie française**, sur le français seulement : espace fine insécable (U+202F) entre les milliers et avant « ; ! ? », espace insécable (U+00A0) avant « : » et dans les guillemets « ». Le script `scripts/typographie.mjs` les pose dans les littéraux ; la garde `frenchTypography.test.ts` les vérifie.
+- **Complétude** (`completeness.test.ts`) : chaque contenu, chaque table et chaque nom existe dans les deux langues, aux mêmes places, sans vide ni recopie du français (hors noms propres et mots identiques listés).
 - Glyphes : jamais les caractères Unicode du zodiaque (rendu emoji sur iOS), toujours les glyphes SVG de `src/components/glyphs/`.
 
 ## Calcul et précision

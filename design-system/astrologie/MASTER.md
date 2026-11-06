@@ -88,10 +88,11 @@ Formes douces, pas d'angle vif (préférence exprimée sur Astronomie le 28/10/2
 ## Composants
 
 - **Barre** : marque (petite roue gravée + « Astrologie » en Fell italique), onglets (Signes, Planètes, Maisons,
-  Aspects, Votre thème, Histoire, Science, Lexique), bascule de thème (nom fixe « Thème nuit », `aria-pressed`). Sous 1 140 px, « Menu » regroupe les onglets ; sous 22,5 rem, le nom de la marque est masqué à l'œil.
+  Aspects, Votre thème, Histoire, Science, Lexique), bascule de thème (nom fixe « Thème nuit », `aria-pressed`), bascule
+  de langue (drapeaux). Sous 1 230 px, « Menu » regroupe les onglets ; sous 22,5 rem, le nom de la marque est masqué à l'œil.
   Fond `--fond` opaque, filet `--filet` dessous. Onglet courant : `aria-current="page"`, souligné d'or.
 - **Résumé + Détails** : `h2` (Fell), résumé en 1,1875 rem `--encre`, puis `<details>` : le `summary` est une pilule
-  filetée `--filet`, « Détails » + glyphe plus qui tourne en croix à l'ouverture ; nom accessible complet (« Détails :
+  filetée `--filet`, « Détails » + chevron fin vers le bas qui se retourne vers le haut à l'ouverture ; nom accessible complet (« Détails :
   le mythe du Bélier ») ; ouvert, il dit « Masquer les détails ». Contenu en fondu de 200 ms (aucun en mouvement réduit).
   Sans JavaScript : natif, rien à hydrater.
 - **Fiche** : grille `dt` / `dd` (élément, modalité, maître, exaltation, exil, chute, dates), `dt` en `--encre-douce`
@@ -108,8 +109,16 @@ Formes douces, pas d'angle vif (préférence exprimée sur Astronomie le 28/10/2
   la texture ne tourne qu'au survol ou au focus de sa carte, jamais en mouvement réduit (WCAG 2.2.2).
 - **Note de l'astronome** : encart `--r-md` fileté `--lapis`, petite lunette gravée, texte 0,9375 rem ; renvoie à la
   page Science ou au site Astronomie.
-- **Formulaire du thème natal** : champs `--r-sm` de 44 px, étiquettes au-dessus, aide sous le champ, erreurs en
-  texte (`aria-describedby`), jamais par la seule couleur. Les données restent dans le navigateur, et la page le dit.
+- **Formulaire du thème natal** : champs `--r-sm` de 44 px, étiquettes au-dessus, aides dans une bulle « i », erreurs
+  en texte (`aria-describedby`), jamais par la seule couleur. Les données restent dans le navigateur, et la page le dit.
+- **Date et heure** (`src/components/form/`) : jamais `<input type="date|time">`, dont le format suit la langue du
+  système. Champs en segments (jj / mm / aaaa, hh : mm ; en anglais dd / mm / yyyy et hh : mm AM/PM), un vrai champ
+  texte par segment (clavier numérique sur mobile), saisie d'un trait, collage réparti. Bouton gravé à droite : calendrier
+  (listes mois et année, semaine du lundi) ou colonnes de l'heure. Valeur toujours `YYYY-MM-DD` et `HH:MM` sur 24 h.
+  **Focus discret** : cadre `--lapis` + halo de 3 px à 16 %, segment actif teinté à 14 %, sans contour ; dans les
+  panneaux, fin cercle intérieur de 1,5 px. Contour système en couleurs forcées.
+- **Bascule de langue** : interrupteur à deux drapeaux à côté de la bascule de thème ; sous 26 rem, « Menu » devient
+  un bouton rond à l'icône seule.
 
 ## Mouvement
 

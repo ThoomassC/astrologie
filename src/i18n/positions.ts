@@ -1,3 +1,4 @@
+import type { Locale } from "@/i18n/locales";
 import { SIGN_NAMES } from "@/i18n/names";
 import type { Longitude } from "@/lib/astro/keys";
 import { degreeInSign, signOf } from "@/lib/astro/zodiac";
@@ -21,9 +22,10 @@ function degreesAndMinutes(l: Longitude): string {
 /**
  * « 12°34′ Bélier » : degré dans le signe, minutes TRONQUÉES sur deux chiffres (29,9999 → « 29°59′ Bélier », jamais
  * « 30°00′ »), prime U+2032, espace insécable (U+00A0) avant le nom du signe, pour que la ligne ne s'y coupe pas.
+ * Le nom du signe suit la langue : « 12°34′ Aries » en anglais.
  */
-export function formatPosition(l: Longitude): string {
-  return `${degreesAndMinutes(l)}${NBSP}${SIGN_NAMES[signOf(l)].name}`;
+export function formatPosition(l: Longitude, locale: Locale): string {
+  return `${degreesAndMinutes(l)}${NBSP}${SIGN_NAMES[locale][signOf(l)].name}`;
 }
 
 /** « 12°34′ » : la même chose, sans le signe. */

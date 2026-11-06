@@ -1,7 +1,11 @@
+import type { Locale } from "@/i18n/locales";
+import { ABOUT_EN } from "./en";
 import { ABOUT_FR } from "./fr";
 import type { AboutContent } from "./types";
 
-/** Textes de la page À propos (serveur seulement). */
-export function getAboutContent(): AboutContent {
-  return ABOUT_FR;
+const CONTENT: Readonly<Record<Locale, AboutContent>> = { fr: ABOUT_FR, en: ABOUT_EN };
+
+/** Textes de la page À propos, dans une langue (serveur seulement). */
+export function getAboutContent(locale: Locale): AboutContent {
+  return CONTENT[locale];
 }

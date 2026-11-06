@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useSyncExternalStore } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { isTheme, THEME_STORAGE_KEY, type Theme } from "@/lib/site/theme";
 import styles from "./SiteHeader.module.css";
 import { SITE_STRINGS } from "./site.strings";
@@ -71,6 +72,7 @@ function MoonIcon() {
  * affichée. Au serveur, le thème est inconnu (il dépend du système et du choix gardé) : pas d'état, lune dessinée.
  */
 export function ThemeToggle() {
+  const { themeNight } = SITE_STRINGS[useLocale()];
   const theme = useSyncExternalStore<Theme | null>(subscribe, effectiveTheme, () => null);
 
   // Le script en ligne a posé le choix gardé avant la peinture ; on le repose au montage, au cas où un remontage
@@ -87,9 +89,9 @@ export function ThemeToggle() {
       type="button"
       className={styles.themeToggle}
       onClick={() => applyTheme(effectiveTheme() === "nuit" ? "jour" : "nuit")}
-      aria-label={SITE_STRINGS.themeNight}
+      aria-label={themeNight}
       aria-pressed={theme === null ? undefined : theme === "nuit"}
-      title={SITE_STRINGS.themeNight}
+      title={themeNight}
     >
       <svg
         width="22"

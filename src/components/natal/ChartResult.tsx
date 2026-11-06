@@ -13,6 +13,8 @@ import {
   POINT_NAMES,
   SIGN_NAMES,
 } from "@/i18n/names";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 import { formatDegreeInSign, formatPosition } from "@/i18n/positions";
 import { ASPECTS } from "@/lib/astro/aspectData";
 import type { Aspect } from "@/lib/astro/aspects";
@@ -35,10 +37,10 @@ import { CITIES } from "@/lib/geo/cities";
 import { aspectPath, housePath, lexiconPath, planetPath, signPath } from "@/lib/site/routes";
 import { CITY_STRINGS } from "./cities.strings";
 import { clockOffset, clockTime, decimal, longDate, utcDateTime } from "./format";
-import { NATAL_STRINGS as S } from "./natal.strings";
+import { NATAL_STRINGS } from "./natal.strings";
 import { NatalDetails } from "./NatalDetails";
 import { countryName } from "./places";
-import { READING_STRINGS as R } from "./reading.strings";
+import { READING_STRINGS } from "./reading.strings";
 import styles from "./natal.module.css";
 
 /** Aspects majeurs repris dans la lecture guidée : les plus serrés. */
@@ -47,8 +49,8 @@ const READING_ASPECTS = 4;
 const FIRST_READ: readonly PlanetKey[] = ["sun", "moon"];
 
 /**
- * Ancres du lexique (`src/content/lexicon/fr.ts`), écrites ici : le contenu du lexique reste sur le serveur. Pas
- * d'entrée « appliquant » : la colonne renvoie à l'entrée « aspect ».
+ * Ancres du lexique (`src/content/lexicon/`), les mêmes dans les deux langues, écrites ici : le contenu du lexique
+ * reste sur le serveur. Pas d'entrée « appliquant » : la colonne renvoie à l'entrée « aspect ».
  */
 const LEXICON = { motion: "retrogradation", orb: "orbe", phase: "aspect", cusp: "cuspide" } as const;
 
@@ -65,9 +67,11 @@ function aspectLongitude(chart: NatalChart, key: AspectPointKey): number | null 
   return chart.positions[key].longitude;
 }
 
-function placeOf({ input: { cityKey, latitude, longitude } }: NatalChart): string {
-  if (cityKey !== null) return S.cityIn(CITY_STRINGS.cities[cityKey], countryName(CITIES[cityKey].country));
-  return S.coordinates(decimal(Math.abs(latitude)), latitude >= 0, decimal(Math.abs(longitude)), longitude >= 0);
+function placeOf({ input: { cityKey, latitude, longitude } }: NatalChart, locale: Locale): string {
+  const S = NATAL_STRINGS[locale];
+  if (cityKey !== null) return S.cityIn(CITY_STRINGS[locale].cities[cityKey], countryName(CITIES[cityKey].country, locale));
+  const coordinate = (n: number) => decimal(Math.abs(n), locale);
+  return S.coordinates(coordinate(latitude), latitude >= 0, coordinate(longitude), longitude >= 0);
 }
 
 /** Signe incertain (heure inconnue) : l'autre signe possible est le suivant si l'astre va vers la fin du sien. */
@@ -79,8 +83,9 @@ const share = (count: number) => `${(count / PLANET_KEYS.length) * 100}%`;
 
 /** En-tête de colonne qui renvoie au lexique. */
 function Term({ children, entry }: { children: string; entry: string }) {
+  const locale = useLocale();
   return (
-    <Link prefetch={false} href={lexiconPath(entry)}>
+    <Link prefetch={false} href={lexiconPath(entry, locale)}>
       {children}
     </Link>
   );
@@ -88,6 +93,9 @@ function Term({ children, entry }: { children: string; entry: string }) {
 
 /** Tableau d'aspects : Aspect | Astres | Orbe | Évolution ; défilement au clavier quand il déborde. */
 function AspectTable({ aspects, caption }: { aspects: readonly Aspect[]; caption: string }) {
+  const locale = useLocale();
+  const S = NATAL_STRINGS[locale];
+  const names = POINT_NAMES[locale];
   const id = useId();
   const [aspect, pair, orb, phase] = S.aspectHeaders;
   return (
@@ -112,12 +120,12 @@ function AspectTable({ aspects, caption }: { aspects: readonly Aspect[]; caption
               <th scope="row">
                 <span className={styles.name}>
                   {hasGlyph(row.key) ? <Glyph name={row.key} size={18} className={styles.glyph} /> : null}
-                  <Link prefetch={false} href={aspectPath(row.key)}>
-                    {ASPECT_NAMES[row.key]}
+                  <Link prefetch={false} href={aspectPath(row.key, locale)}>
+                    {ASPECT_NAMES[locale][row.key]}
                   </Link>
                 </span>
               </th>
-              <td>{S.pair(POINT_NAMES[row.a].name, POINT_NAMES[row.b].name)}</td>
+              <td>{S.pair(names[row.a].name, names[row.b].name)}</td>
               <td>{formatDegreeInSign(row.orb)}</td>
               <td>
                 {row.applying === null ? (
@@ -167,6 +175,11 @@ interface ChartResultProps {
  * dans les bulles « i ». Liens sans préchargement : un préchargement dirait au serveur quels signes la page affiche.
  */
 export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
+  const locale = useLocale();
+  const S = NATAL_STRINGS[locale];
+  const R = READING_STRINGS[locale];
+  const signs = SIGN_NAMES[locale];
+  const names = POINT_NAMES[locale];
   const id = useId();
   const { input, positions, angles, houses, aspects, balance } = chart;
   const timeKnown = angles !== null && houses !== null;
@@ -174,12 +187,12 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
   const minors = aspects.filter((aspect) => ASPECTS[aspect.key].family === "minor");
   const uncertain = CHART_POINT_KEYS.filter((key) => positions[key].signUncertain);
   const retrogrades = PLANET_KEYS.filter((key) => positions[key].motion === "retrograde");
-  const utc = utcDateTime(input.utcMs);
+  const utc = utcDateTime(input.utcMs, locale);
   const ascendantSign = angles ? signOf(angles.ascendant) : null;
 
   const signLink = (sign: SignKey) => (
-    <Link prefetch={false} href={signPath(sign)}>
-      {SIGN_NAMES[sign].name}
+    <Link prefetch={false} href={signPath(sign, locale)}>
+      {signs[sign].name}
     </Link>
   );
   const markedSign = (sign: SignKey, signUncertain: boolean) => (
@@ -200,9 +213,9 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
     return (
       <li key={key}>
         {R.sentence(
-          POINT_NAMES[key].the,
+          names[key].the,
           R.planetDomain[key],
-          SIGN_NAMES[sign].of,
+          signs[sign].of,
           R.signManner[sign],
           timeKnown && house !== null ? R.houseArea[house] : null,
         )}
@@ -239,7 +252,7 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
           </InfoTip>
         </div>
         <p className={styles.birth}>
-          {S.birth(longDate(input.local), input.timeKnown ? clockTime(input.local) : null, placeOf(chart))}
+          {S.birth(longDate(input.local, locale), input.timeKnown ? clockTime(input.local, locale) : null, placeOf(chart, locale))}
         </p>
         <p className={styles.bigThree}>
           {bigThree.map((part, index) => (
@@ -260,7 +273,7 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
         <ul>
           {FIRST_READ.map(reading)}
           {angles !== null && ascendantSign !== null ? (
-            <li>{R.ascendantSentence(SIGN_NAMES[ascendantSign].of, R.signManner[ascendantSign])}</li>
+            <li>{R.ascendantSentence(signs[ascendantSign].of, R.signManner[ascendantSign])}</li>
           ) : null}
         </ul>
         <h4 className={styles.subTitle}>{S.otherPlanets}</h4>
@@ -274,10 +287,10 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
               {majors.slice(0, READING_ASPECTS).map((aspect) => (
                 <li key={`${aspect.a}-${aspect.b}`}>
                   {R.aspectSentence(
-                    POINT_NAMES[aspect.a].the,
-                    POINT_NAMES[aspect.b].the,
+                    names[aspect.a].the,
+                    names[aspect.b].the,
                     R.aspectNature[ASPECTS[aspect.key].nature],
-                    ASPECT_NAMES[aspect.key].toLocaleLowerCase("fr-FR"),
+                    ASPECT_NAMES[locale][aspect.key].toLocaleLowerCase(INTL_LOCALE[locale]),
                   )}
                 </li>
               ))}
@@ -292,6 +305,7 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
           <ZodiacWheel
             titleId={`${id}-roue`}
             title={S.wheelLabel(timeKnown)}
+            locale={locale}
             descriptionId={`${id}-positions`}
             leftLongitude={angles?.ascendant ?? 0}
             cusps={houses?.cusps}
@@ -308,8 +322,8 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
 
       <Block
         title={S.positionsTitle}
-        tip={uncertain.length > 0 ? S.noteUncertain(uncertain.map((key) => POINT_NAMES[key].name)) : undefined}
-        lead={S.positionsSummary(retrogrades.map((key) => POINT_NAMES[key].name))}>
+        tip={uncertain.length > 0 ? S.noteUncertain(uncertain.map((key) => names[key].name)) : undefined}
+        lead={S.positionsSummary(retrogrades.map((key) => names[key].name))}>
         <div className={demo.tableWrap} role="group" aria-labelledby={`${id}-positions-titre`} tabIndex={0}>
           <table id={`${id}-positions`} className={demo.table}>
             <caption id={`${id}-positions-titre`}>{S.positionsTitle}</caption>
@@ -332,16 +346,16 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
                       <span className={styles.name}>
                         <Glyph name={key} size={20} className={styles.glyph} />
                         {isPlanetKey(key) ? (
-                          <Link prefetch={false} href={planetPath(key)}>
-                            {POINT_NAMES[key].name}
+                          <Link prefetch={false} href={planetPath(key, locale)}>
+                            {names[key].name}
                           </Link>
                         ) : (
-                          POINT_NAMES[key].name
+                          names[key].name
                         )}
                       </span>
                     </th>
                     <td>
-                      {formatPosition(point.longitude)}
+                      {formatPosition(point.longitude, locale)}
                       {point.signUncertain ? <span className={styles.mark}>{S.uncertain}</span> : null}
                     </td>
                     {timeKnown ? (
@@ -349,7 +363,7 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
                         {point.house === null ? null : (
                           <Link
                             prefetch={false}
-                            href={housePath(point.house)}
+                            href={housePath(point.house, locale)}
                             aria-label={S.house(houseRoman(point.house))}
                           >
                             {houseRoman(point.house)}
@@ -374,8 +388,8 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
       <Block
         title={S.balanceTitle}
         lead={S.dominants(
-          balance.dominantElements.map((key) => ELEMENT_NAMES[key].name),
-          balance.dominantModalities.map((key) => MODALITY_NAMES[key].name),
+          balance.dominantElements.map((key) => ELEMENT_NAMES[locale][key].name),
+          balance.dominantModalities.map((key) => MODALITY_NAMES[locale][key].name),
         )}
       >
         <div className={styles.balance}>
@@ -386,13 +400,13 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
                 const members = PLANET_KEYS.filter((planet) => SIGNS[positions[planet].sign].element === key);
                 return (
                   <li key={key} className={`${styles.bar} ${PIGMENT[key]}`}>
-                    <span className={styles.barName}>{ELEMENT_NAMES[key].name}</span>
+                    <span className={styles.barName}>{ELEMENT_NAMES[locale][key].name}</span>
                     <span className={styles.track} aria-hidden="true">
                       <span className={styles.fill} style={{ width: share(balance.elements[key]) }} />
                     </span>
                     <span className={styles.count}>{balance.elements[key]}</span>
                     {members.length > 0 ? (
-                      <span className={styles.members}>{S.list(members.map((planet) => POINT_NAMES[planet].name))}</span>
+                      <span className={styles.members}>{S.list(members.map((planet) => names[planet].name))}</span>
                     ) : null}
                   </li>
                 );
@@ -406,13 +420,13 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
                 const members = PLANET_KEYS.filter((planet) => SIGNS[positions[planet].sign].modality === key);
                 return (
                   <li key={key} className={styles.bar}>
-                    <span className={styles.barName}>{MODALITY_NAMES[key].name}</span>
+                    <span className={styles.barName}>{MODALITY_NAMES[locale][key].name}</span>
                     <span className={styles.track} aria-hidden="true">
                       <span className={styles.fill} style={{ width: share(balance.modalities[key]) }} />
                     </span>
                     <span className={styles.count}>{balance.modalities[key]}</span>
                     {members.length > 0 ? (
-                      <span className={styles.members}>{S.list(members.map((planet) => POINT_NAMES[planet].name))}</span>
+                      <span className={styles.members}>{S.list(members.map((planet) => names[planet].name))}</span>
                     ) : null}
                   </li>
                 );
@@ -427,13 +441,13 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
           title={S.housesTitle}
           tip={houses.fallback ? S.noteFallback(houses.fallback.reason === "polar-latitude") : undefined}
           lead={S.housesSummary(
-            HOUSE_SYSTEM_NAMES[houses.used],
-            formatPosition(angles.ascendant),
-            formatPosition(angles.midheaven),
+            HOUSE_SYSTEM_NAMES[locale][houses.used],
+            formatPosition(angles.ascendant, locale),
+            formatPosition(angles.midheaven, locale),
           )}
         >
           <div className={demo.tableWrap}>
-            <table className={demo.table} aria-label={S.cusps(HOUSE_SYSTEM_NAMES[houses.used])}>
+            <table className={demo.table} aria-label={S.cusps(HOUSE_SYSTEM_NAMES[locale][houses.used])}>
               <thead>
                 <tr>
                   <th scope="col">{S.cuspHeaders[0]}</th>
@@ -446,11 +460,11 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
                 {HOUSE_NUMBERS.map((number) => (
                   <tr key={number}>
                     <th scope="row">
-                      <Link prefetch={false} href={housePath(number)} aria-label={S.house(houseRoman(number))}>
+                      <Link prefetch={false} href={housePath(number, locale)} aria-label={S.house(houseRoman(number))}>
                         {houseRoman(number)}
                       </Link>
                     </th>
-                    <td>{formatPosition(houses.cusps[number - 1])}</td>
+                    <td>{formatPosition(houses.cusps[number - 1], locale)}</td>
                   </tr>
                 ))}
               </tbody>

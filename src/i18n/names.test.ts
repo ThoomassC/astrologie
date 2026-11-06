@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
+import { LOCALES } from "@/i18n/locales";
 import { HOUSE_NUMBERS } from "@/lib/astro/keys";
 import {
   ANGLE_ABBREVIATIONS,
@@ -26,22 +27,22 @@ function entries(table: string, record: Readonly<Record<string, unknown>>): [str
   );
 }
 
-const NAMES = [
-  ...entries("SIGN_NAMES", SIGN_NAMES),
-  ...entries("POINT_NAMES", POINT_NAMES),
-  ...entries("ANGLE_ABBREVIATIONS", ANGLE_ABBREVIATIONS),
-  ...entries("ELEMENT_NAMES", ELEMENT_NAMES),
-  ...entries("MODALITY_NAMES", MODALITY_NAMES),
-  ...entries("PLANET_GROUP_NAMES", PLANET_GROUP_NAMES),
-  ...entries("ASPECT_NAMES", ASPECT_NAMES),
-  ...entries("HOUSE_SYSTEM_NAMES", HOUSE_SYSTEM_NAMES),
-  ...entries("CONSTELLATION_NAMES", CONSTELLATION_NAMES),
-  ...entries("MONTH_NAMES", Object.fromEntries(MONTH_NAMES.map((name, index) => [index + 1, name]))),
-];
+const NAMES = LOCALES.flatMap((locale) => [
+  ...entries(`SIGN_NAMES.${locale}`, SIGN_NAMES[locale]),
+  ...entries(`POINT_NAMES.${locale}`, POINT_NAMES[locale]),
+  ...entries(`ANGLE_ABBREVIATIONS.${locale}`, ANGLE_ABBREVIATIONS[locale]),
+  ...entries(`ELEMENT_NAMES.${locale}`, ELEMENT_NAMES[locale]),
+  ...entries(`MODALITY_NAMES.${locale}`, MODALITY_NAMES[locale]),
+  ...entries(`PLANET_GROUP_NAMES.${locale}`, PLANET_GROUP_NAMES[locale]),
+  ...entries(`ASPECT_NAMES.${locale}`, ASPECT_NAMES[locale]),
+  ...entries(`HOUSE_SYSTEM_NAMES.${locale}`, HOUSE_SYSTEM_NAMES[locale]),
+  ...entries(`CONSTELLATION_NAMES.${locale}`, CONSTELLATION_NAMES[locale]),
+  ...entries(`MONTH_NAMES.${locale}`, Object.fromEntries(MONTH_NAMES[locale].map((name, index) => [index + 1, name]))),
+]);
 
 describe("noms affichés", () => {
   it("devrait parcourir toutes les tables (garde contre le test vide)", () => {
-    expect(NAMES.length).toBeGreaterThan(100);
+    expect(NAMES.length).toBeGreaterThan(200);
   });
 
   it.each(NAMES)("devrait donner un texte non vide et sans espace en bord : %s", (_path, text) => {

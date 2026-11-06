@@ -26,7 +26,7 @@ h3.sectionTitle {
   color: var(--encre);
 }
 
-/* Détails : pilule filetée ; un plus gravé qui tourne en croix à l'ouverture. */
+/* Détails : pilule filetée ; un chevron fin, vers le bas, qui se retourne vers le haut à l'ouverture. */
 .details {
   max-width: var(--lecture);
 }
@@ -54,19 +54,18 @@ h3.sectionTitle {
   background: color-mix(in srgb, var(--lapis) 8%, transparent);
 }
 
+/* Flèche simple : un chevron fin qui pointe vers le bas, puis vers le haut une fois ouvert. */
 .plus {
-  width: 9px;
-  height: 9px;
+  width: 12px;
+  height: 12px;
   flex: none;
-  margin-inline: 2px;
-  border-right: 1.6px solid currentColor;
-  border-bottom: 1.6px solid currentColor;
-  transform: translateY(-2px) rotate(45deg);
-  transition: transform var(--duree) ease;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.25 6 8.25 10 4.25' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: rotate var(--duree) ease;
 }
 
 .details[open] > .summary .plus {
-  transform: translateY(2px) rotate(-135deg);
+  rotate: 180deg;
 }
 
 .whenOpen,
@@ -316,5 +315,12 @@ h3.sectionTitle {
     position-area: bottom span-right;
     position-try-fallbacks: flip-block, flip-inline;
     margin: var(--s-2) 0 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .plus {
+    forced-color-adjust: none;
+    background: ButtonText;
   }
 }

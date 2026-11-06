@@ -1,0 +1,393 @@
+/*
+ * Champs de date et d'heure en segments, et leurs panneaux (calendrier, colonnes de l'heure).
+ * Focus discret mais lisible : le cadre prend l'outremer et un halo léger (simple ambiance), et l'élément qui a
+ * vraiment le focus porte un trait fin d'outremer, au moins 5:1 sur le fond (WCAG 2.4.7, 1.4.11) : souligné sous le
+ * segment actif, anneau intérieur de 1,5 px sur les boutons et dans les panneaux. En couleurs forcées, contour système.
+ */
+
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  width: 100%;
+  min-height: 44px;
+  padding-block: 0;
+  padding-inline: var(--s-2) var(--s-1);
+  /* --encre-douce : au moins 3:1 sur la plaque, dans les deux thèmes. */
+  border: 1px solid var(--encre-douce);
+  border-radius: var(--r-sm);
+  background: var(--fond);
+  color: var(--encre);
+  font-variant-numeric: tabular-nums;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.field:hover {
+  border-color: var(--encre);
+}
+
+.field:focus-within {
+  border-color: var(--lapis);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lapis) 16%, transparent);
+}
+
+/* En erreur : bord doublé (ombre intérieure, sans décalage), et le message écrit dessous, jamais la couleur seule. */
+.field[data-invalid] {
+  border-color: var(--feu);
+  box-shadow: inset 0 0 0 1px var(--feu);
+}
+
+.field[data-invalid]:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--feu),
+    0 0 0 3px color-mix(in srgb, var(--feu) 16%, transparent);
+}
+
+.field[data-disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.field[data-disabled]:hover {
+  border-color: var(--encre-douce);
+}
+
+.segments {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+}
+
+.segment {
+  box-sizing: content-box;
+  /* « mm » est plus large que deux chiffres : la case suit son texte, au moins deux chiffres de large. */
+  inline-size: 2.8ch;
+  min-inline-size: 2ch;
+  field-sizing: content;
+  padding: 0.3rem 0.3rem;
+  margin: 0;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  text-align: center;
+  caret-color: transparent;
+}
+
+.segment::placeholder {
+  color: var(--encre-douce);
+  opacity: 1;
+}
+
+.segment::selection {
+  background: transparent;
+}
+
+.segment:focus,
+.segment:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--lapis) 14%, transparent);
+  box-shadow: inset 0 -2px 0 var(--lapis);
+  color: var(--encre);
+}
+
+.segment:disabled {
+  cursor: not-allowed;
+}
+
+.year {
+  inline-size: 4.4ch;
+  min-inline-size: 4ch;
+}
+
+/* AM / PM : un bouton qui a l'allure des autres segments. */
+.period {
+  inline-size: auto;
+  min-inline-size: 2.5ch;
+  margin-inline-start: var(--s-1);
+  cursor: pointer;
+}
+
+.period[data-empty] {
+  color: var(--encre-douce);
+}
+
+.separator {
+  color: var(--encre-douce);
+  user-select: none;
+}
+
+.trigger {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--encre-douce);
+  cursor: pointer;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease;
+}
+
+.trigger:hover:not(:disabled) {
+  color: var(--lapis);
+  background: color-mix(in srgb, var(--lapis) 10%, transparent);
+}
+
+.trigger:focus-visible {
+  outline: none;
+  color: var(--lapis);
+  background: color-mix(in srgb, var(--lapis) 14%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--lapis);
+}
+
+.trigger:disabled {
+  cursor: not-allowed;
+}
+
+/* ---------- Panneaux ---------- */
+
+.panel {
+  max-block-size: calc(100dvh - 1rem);
+  overflow: auto;
+  margin: auto;
+  padding: var(--s-3);
+  border: 1px solid var(--filet-fort);
+  border-radius: var(--r-md);
+  background: var(--plaque);
+  color: var(--encre);
+  font-family: var(--font-texte);
+  font-size: var(--t-sm);
+  box-shadow: 0 18px 44px -22px rgb(0 0 0 / 0.55);
+}
+
+.panel::backdrop {
+  background: transparent;
+}
+
+@supports (position-anchor: --a) {
+  .panel {
+    position-area: bottom span-right;
+    position-try-fallbacks: flip-block, flip-inline;
+    margin: var(--s-2) 0 0;
+  }
+}
+
+/* Dans les panneaux, le focus reste discret : un fin cercle d'outremer à l'intérieur de la case. */
+.panel :focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--lapis);
+}
+
+/* Calendrier */
+
+.calendar {
+  display: grid;
+  gap: var(--s-2);
+  width: min(19rem, calc(100vw - 2.5rem));
+}
+
+.calendarHead {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.navButton {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  min-block-size: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--encre);
+  cursor: pointer;
+}
+
+.navButton:hover:not([aria-disabled="true"]) {
+  background: color-mix(in srgb, var(--lapis) 10%, transparent);
+}
+
+.navButton[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.select {
+  flex: 1;
+  min-width: 0;
+  min-block-size: 2rem;
+  padding-inline: var(--s-2);
+  border: 1px solid var(--filet-fort);
+  border-radius: var(--r-pill);
+  background: var(--plaque);
+  color: var(--encre);
+  font: inherit;
+  cursor: pointer;
+}
+
+.select:hover {
+  border-color: var(--encre-douce);
+}
+
+.days {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.days th {
+  padding-block: var(--s-1);
+  color: var(--encre-douce);
+  font-size: var(--t-xs);
+  font-weight: 400;
+  text-align: center;
+}
+
+.days td {
+  padding: 1px;
+  text-align: center;
+}
+
+.day {
+  display: inline-grid;
+  place-items: center;
+  width: 100%;
+  max-width: 36px;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--encre);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.day:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--lapis) 10%, transparent);
+}
+
+.day[aria-current="date"] {
+  color: var(--or-texte);
+  text-decoration: underline;
+  text-decoration-color: var(--or);
+  text-underline-offset: 0.25em;
+}
+
+.day[aria-pressed="true"] {
+  background: var(--lapis);
+  color: var(--plaque);
+}
+
+.day[aria-pressed="true"]:focus-visible,
+.clockOption[aria-selected="true"]:focus-visible {
+  box-shadow:
+    inset 0 0 0 1.5px var(--lapis),
+    inset 0 0 0 3px var(--plaque);
+}
+
+.day:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Colonnes de l'heure */
+
+.clock {
+  display: flex;
+  gap: var(--s-1);
+}
+
+.clockColumn {
+  display: grid;
+  gap: var(--s-1);
+  justify-items: center;
+}
+
+.clockHead {
+  min-height: 1.2em;
+  color: var(--encre-douce);
+  font-size: var(--t-xs);
+}
+
+.clockList {
+  display: grid;
+  gap: 2px;
+  max-height: min(14rem, 50dvh);
+  padding: 2px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.clockOption {
+  display: grid;
+  place-items: center;
+  min-width: 3rem;
+  min-block-size: 2rem;
+  padding-inline: var(--s-2);
+  border-radius: var(--r-xs);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  user-select: none;
+}
+
+.clockOption:hover {
+  background: color-mix(in srgb, var(--lapis) 10%, transparent);
+}
+
+.clockOption[aria-selected="true"] {
+  background: var(--lapis);
+  color: var(--plaque);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field,
+  .trigger {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .field:focus-within {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  .segment:focus,
+  .trigger:focus-visible,
+  .panel :focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .day[aria-pressed="true"],
+  .clockOption[aria-selected="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .day[aria-pressed="true"]:focus-visible,
+  .clockOption[aria-selected="true"]:focus-visible {
+    outline-color: HighlightText;
+  }
+}

@@ -3,21 +3,21 @@ import layout from "@/components/text/layout.module.css";
 import { PageHeader } from "@/components/text/PageHeader";
 import { getAboutContent } from "@/content/about/content";
 import { ABOUT_SECTION_IDS } from "@/content/about/types";
-import { getImagesContent } from "@/content/images/content";
-import { creditLine } from "@/content/images/fr";
+import { creditLine, getImagesContent } from "@/content/images/content";
 import type { ImageCredit } from "@/content/images/types";
 import { getUiContent } from "@/content/ui/content";
+import type { Locale } from "@/i18n/locales";
 import { HISTORY_IMAGE_ORDER } from "@/lib/site/imageOrder";
 import { PLANET_KEYS, SIGN_KEYS } from "@/lib/astro/keys";
 import { MAIN_ID } from "@/lib/site/ids";
 import styles from "@/components/history/history.module.css";
 
-function CreditList({ credits }: { credits: readonly ImageCredit[] }) {
+function CreditList({ credits, locale }: { credits: readonly ImageCredit[]; locale: Locale }) {
   return (
     <ul>
       {credits.map((credit) => (
         <li key={credit.pageHref + credit.title}>
-          {creditLine(credit)}{" "}
+          {creditLine(credit, locale)}{" "}
           <a href={credit.pageHref} rel="noopener">
             {credit.title}
           </a>
@@ -28,18 +28,18 @@ function CreditList({ credits }: { credits: readonly ImageCredit[] }) {
 }
 
 /** À propos : démarche, méthode du calcul, sources, images (crédits complets), confidentialité. */
-export function AboutPage() {
-  const content = getAboutContent();
-  const images = getImagesContent();
-  const ui = getUiContent().about;
+export function AboutPage({ locale }: { locale: Locale }) {
+  const content = getAboutContent(locale);
+  const images = getImagesContent(locale);
+  const ui = getUiContent(locale).about;
   return (
     <main id={MAIN_ID} tabIndex={-1} className={layout.page}>
-      <PageHeader title={content.title} lead={content.lead} />
+      <PageHeader title={content.title} lead={content.lead} locale={locale} />
       <div className={layout.stack}>
         {ABOUT_SECTION_IDS.map((id) => {
           const section = content.sections[id];
           return (
-            <ExplainedSection key={id} id={id} text={section}>
+            <ExplainedSection key={id} id={id} text={section} locale={locale}>
               {section.links.length > 0 ? (
                 <ul>
                   {section.links.map((link) => (
@@ -55,13 +55,13 @@ export function AboutPage() {
                 <div className={styles.sources}>
                   <p className={styles.sourcesTitle}>{ui.creditsTitle}</p>
                   <p>{ui.creditsSigns}</p>
-                  <CreditList credits={SIGN_KEYS.map((key) => images.signs[key])} />
+                  <CreditList credits={SIGN_KEYS.map((key) => images.signs[key])} locale={locale} />
                   <p>{ui.creditsHistory}</p>
-                  <CreditList credits={HISTORY_IMAGE_ORDER.map((key) => images.history[key])} />
+                  <CreditList credits={HISTORY_IMAGE_ORDER.map((key) => images.history[key])} locale={locale} />
                   <p>{ui.creditsMaps}</p>
-                  <CreditList credits={PLANET_KEYS.map((key) => images.planetMaps[key])} />
+                  <CreditList credits={PLANET_KEYS.map((key) => images.planetMaps[key])} locale={locale} />
                   <p>{ui.creditsOther}</p>
-                  <CreditList credits={[images.zodiacalLight, images.paper]} />
+                  <CreditList credits={[images.zodiacalLight, images.paper]} locale={locale} />
                 </div>
               ) : null}
             </ExplainedSection>

@@ -14,6 +14,7 @@ import { getSignsContent } from "@/content/signs/content";
 import { SIGN_SECTION_IDS } from "@/content/signs/types";
 import { getUiContent } from "@/content/ui/content";
 import { formatMonthDay, formatUtcDay } from "@/i18n/dates";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 import { CONSTELLATION_NAMES, ELEMENT_NAMES, MODALITY_NAMES, POINT_NAMES, SIGN_NAMES } from "@/i18n/names";
 import { CONSTELLATIONS } from "@/lib/astro/constellations";
 import { sunPassages } from "@/lib/astro/constellationPassages";
@@ -22,24 +23,26 @@ import { SIGN_KEYS } from "@/lib/astro/keys";
 import { detriment, fall, SIGNS } from "@/lib/astro/signs";
 import { MAIN_ID } from "@/lib/site/ids";
 import { SIGN_IMAGES } from "@/lib/site/images";
-import { planetPath, SECTION_PATHS, signPath } from "@/lib/site/routes";
+import { planetPath, sectionPath, signPath } from "@/lib/site/routes";
 import { ELEMENT_COLORS } from "./elementColors";
 import styles from "./signs.module.css";
 
 /** Année des dates de passage du Soleil dans les constellations (calculées au build). */
 export const PASSAGE_YEAR = 2026;
 
-const magnitude = (m: number) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(m);
+const magnitude = (m: number, locale: Locale) =>
+  new Intl.NumberFormat(INTL_LOCALE[locale], { maximumFractionDigits: 2 }).format(m);
 
 /** Fiche d'un signe : en-tête, estampe, résumé, qualités et travers, puis sept sections à déplier ; manchette. */
-export function SignPage({ sign }: { sign: SignKey }) {
-  const content = getSignsContent();
+export function SignPage({ sign, locale }: { sign: SignKey; locale: Locale }) {
+  const content = getSignsContent(locale);
   const text = content.signs[sign];
-  const ui = getUiContent().signs;
-  const common = getCommonContent();
-  const credit = getImagesContent().signs[sign];
+  const ui = getUiContent(locale).signs;
+  const common = getCommonContent(locale);
+  const credit = getImagesContent(locale).signs[sign];
   const data = SIGNS[sign];
-  const name = SIGN_NAMES[sign];
+  const signNames = SIGN_NAMES[locale];
+  const name = signNames[sign];
   const constellation = CONSTELLATIONS[data.constellation];
   const exile = detriment(sign);
   const fallen = fall(sign);
@@ -52,20 +55,20 @@ export function SignPage({ sign }: { sign: SignKey }) {
   const ophiuchus = sign === "scorpio" || sign === "sagittarius" ? passages.find((p) => p.constellation === "Oph") : undefined;
 
   const planetLink = (planet: PlanetKey) => (
-    <Link href={planetPath(planet)}>{POINT_NAMES[planet].name}</Link>
+    <Link href={planetPath(planet, locale)}>{POINT_NAMES[locale][planet].name}</Link>
   );
 
   const fiche = [
-    { label: ui.fiche.dates, value: `${formatMonthDay(data.dates.start)} – ${formatMonthDay(data.dates.end)}` },
+    { label: ui.fiche.dates, value: `${formatMonthDay(data.dates.start, locale)} – ${formatMonthDay(data.dates.end, locale)}` },
     {
       label: ui.fiche.element,
       value: (
         <span className={styles.pastille} style={{ "--pastille": ELEMENT_COLORS[data.element] } as CSSProperties}>
-          {ELEMENT_NAMES[data.element].name}
+          {ELEMENT_NAMES[locale][data.element].name}
         </span>
       ),
     },
-    { label: ui.fiche.modality, value: MODALITY_NAMES[data.modality].name },
+    { label: ui.fiche.modality, value: MODALITY_NAMES[locale][data.modality].name },
     {
       label: ui.fiche.polarity,
       value: data.element === "fire" || data.element === "air" ? ui.polarityValues.masculine : ui.polarityValues.feminine,
@@ -99,11 +102,11 @@ export function SignPage({ sign }: { sign: SignKey }) {
     { label: ui.fiche.body, value: text.bodyPart },
     {
       label: ui.fiche.constellation,
-      value: ui.constellationValue(CONSTELLATION_NAMES[data.constellation].latin, Math.round(constellation.areaSqDeg)),
+      value: ui.constellationValue(CONSTELLATION_NAMES[locale][data.constellation].latin, Math.round(constellation.areaSqDeg)),
     },
     {
       label: ui.fiche.brightestStar,
-      value: ui.starValue(text.brightestStarName, constellation.brightestDesignation, magnitude(constellation.brightestMagnitude)),
+      value: ui.starValue(text.brightestStarName, constellation.brightestDesignation, magnitude(constellation.brightestMagnitude, locale)),
     },
   ];
 
@@ -128,7 +131,7 @@ export function SignPage({ sign }: { sign: SignKey }) {
                 <td>{ui.degrees(decan.startDeg, decan.startDeg + 10)}</td>
                 <td>{planetLink(decan.faceRuler)}</td>
                 <td>
-                  <Link href={signPath(decan.triplicitySign)}>{SIGN_NAMES[decan.triplicitySign].name}</Link>
+                  <Link href={signPath(decan.triplicitySign, locale)}>{signNames[decan.triplicitySign].name}</Link>
                 </td>
               </tr>
             ))}
@@ -142,11 +145,11 @@ export function SignPage({ sign }: { sign: SignKey }) {
           {ui.passage(
             PASSAGE_YEAR,
             name.of,
-            formatUtcDay(passage.startUtcMs),
-            formatUtcDay(passage.endUtcMs),
+            formatUtcDay(passage.startUtcMs, locale),
+            formatUtcDay(passage.endUtcMs, locale),
           )}
           {ophiuchus && sign === "scorpio"
-            ? ` ${ui.passageOphiuchus(PASSAGE_YEAR, formatUtcDay(ophiuchus.startUtcMs), formatUtcDay(ophiuchus.endUtcMs))}`
+            ? ` ${ui.passageOphiuchus(PASSAGE_YEAR, formatUtcDay(ophiuchus.startUtcMs, locale), formatUtcDay(ophiuchus.endUtcMs, locale))}`
             : null}{" "}
           <InfoTip subject={ui.passageInfo}>{ui.passageNote}</InfoTip>
         </p>
@@ -165,9 +168,10 @@ export function SignPage({ sign }: { sign: SignKey }) {
         }
         lead={text.tagline}
         crumbs={[
-          { label: common.breadcrumbHome, href: SECTION_PATHS.home },
-          { label: content.index.title, href: SECTION_PATHS.signs },
+          { label: common.breadcrumbHome, href: sectionPath("home", locale) },
+          { label: content.index.title, href: sectionPath("signs", locale) },
         ]}
+        locale={locale}
       />
 
       <div className={layout.withAside}>
@@ -175,16 +179,23 @@ export function SignPage({ sign }: { sign: SignKey }) {
           image={SIGN_IMAGES[sign]}
           alt={text.imageAlt}
           credit={credit}
+          locale={locale}
           sizes="(min-width: 1100px) 44rem, 92vw"
           priority
         />
         <aside className={layout.aside} aria-label={ui.fiche.label}>
-          <ZodiacWheel titleId={`roue-${sign}`} title={ui.wheelTitle(name.name)} highlightSign={sign} className={styles.miniWheel} />
+          <ZodiacWheel
+            titleId={`roue-${sign}`}
+            title={ui.wheelTitle(name.name)}
+            locale={locale}
+            highlightSign={sign}
+            className={styles.miniWheel}
+          />
           <Fiche rows={fiche} />
         </aside>
 
         <div className={layout.stack}>
-          <ExplainedText text={text.intro} subject={name.name} />
+          <ExplainedText text={text.intro} subject={name.name} locale={locale} />
 
           <div className={styles.keywords}>
             <div>
@@ -206,22 +217,22 @@ export function SignPage({ sign }: { sign: SignKey }) {
           </div>
 
           {SIGN_SECTION_IDS.map((id) => (
-            <ExplainedSection key={id} id={id} text={text.sections[id]}>
+            <ExplainedSection key={id} id={id} text={text.sections[id]} locale={locale}>
               {extras[id]}
             </ExplainedSection>
           ))}
 
           <nav className={styles.prevNext} aria-label={content.index.title}>
-            <Link href={signPath(previous)} rel="prev">
+            <Link href={signPath(previous, locale)} rel="prev">
               <span className={styles.prevNextLabel}>{ui.previous}</span>
               <span className={styles.prevNextName}>
-                <Glyph name={previous} size={22} /> {SIGN_NAMES[previous].name}
+                <Glyph name={previous} size={22} /> {signNames[previous].name}
               </span>
             </Link>
-            <Link href={signPath(next)} rel="next" className={styles.nextLink}>
+            <Link href={signPath(next, locale)} rel="next" className={styles.nextLink}>
               <span className={styles.prevNextLabel}>{ui.next}</span>
               <span className={styles.prevNextName}>
-                {SIGN_NAMES[next].name} <Glyph name={next} size={22} />
+                {signNames[next].name} <Glyph name={next} size={22} />
               </span>
             </Link>
           </nav>

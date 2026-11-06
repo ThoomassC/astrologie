@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { SECTION_PATHS } from "@/lib/site/routes";
+import type { Locale } from "@/i18n/locales";
+import { sectionPath } from "@/lib/site/routes";
 import { AUTHOR, COPYRIGHT_YEAR, REPOSITORY, SISTER_SITE } from "./author";
 import { BrandMark } from "./BrandMark";
 import styles from "./SiteFooter.module.css";
 import { SITE_STRINGS } from "./site.strings";
 
 /** Pied de page commun : renvois (lexique, à propos, site frère, code), contacts de l'auteur, droit d'auteur. */
-export function SiteFooter() {
-  const s = SITE_STRINGS;
+export function SiteFooter({ locale }: { locale: Locale }) {
+  const s = SITE_STRINGS[locale];
   return (
     <footer className={styles.footer} aria-label={s.footerLabel}>
       <div className={styles.inner}>
@@ -16,13 +17,13 @@ export function SiteFooter() {
         </div>
         <ul className={styles.links}>
           <li>
-            <Link href={SECTION_PATHS.lexicon}>{s.footerLexicon}</Link>
+            <Link href={sectionPath("lexicon", locale)}>{s.footerLexicon}</Link>
           </li>
           <li>
-            <Link href={SECTION_PATHS.about}>{s.footerAbout}</Link>
+            <Link href={sectionPath("about", locale)}>{s.footerAbout}</Link>
           </li>
           <li>
-            <a href={SISTER_SITE} rel="noopener">
+            <a href={`${SISTER_SITE}/${locale}`} hrefLang={locale} rel="noopener">
               {s.footerSister}
             </a>
             <span className={styles.note}>, {s.footerSisterNote}</span>

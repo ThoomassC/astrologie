@@ -1,37 +1,47 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
+import { LOCALES } from "@/i18n/locales";
 import { CITIES, CITY_KEYS } from "@/lib/geo/cities";
 import { CITY_STRINGS } from "./cities.strings";
-import { NATAL_STRINGS as S } from "./natal.strings";
+import { NATAL_STRINGS } from "./natal.strings";
 import { CITY_GROUPS } from "./places";
+
+const S = NATAL_STRINGS.fr;
 
 /** Taille mesurée comme la garde globale (`src/i18n/stringsBudget.test.ts`) : JSON, fonctions comprises. */
 const sizeOf = (strings: unknown) =>
   JSON.stringify(strings, (_key, value: unknown) => (typeof value === "function" ? value.toString() : value)).length;
 
 describe("CITY_STRINGS", () => {
-  it("devrait nommer chaque ville du formulaire, et rien d'autre", () => {
-    expect(Object.keys(CITY_STRINGS.cities).sort()).toEqual([...CITY_KEYS].sort());
-    expect(CITY_KEYS.filter((key) => CITY_STRINGS.cities[key].trim() === "")).toEqual([]);
+  it.each(LOCALES)("devrait nommer chaque ville du formulaire, et rien d'autre (%s)", (locale) => {
+    expect(Object.keys(CITY_STRINGS[locale].cities).sort()).toEqual([...CITY_KEYS].sort());
+    expect(CITY_KEYS.filter((key) => CITY_STRINGS[locale].cities[key].trim() === "")).toEqual([]);
   });
 
-  it("devrait nommer chaque pays des villes, et rien d'autre", () => {
+  it.each(LOCALES)("devrait nommer chaque pays des villes, et rien d'autre (%s)", (locale) => {
     const countries = [...new Set(CITY_KEYS.map((key) => CITIES[key].country))].sort();
-    expect(Object.keys(CITY_STRINGS.countries).sort()).toEqual(countries);
+    expect(Object.keys(CITY_STRINGS[locale].countries).sort()).toEqual(countries);
   });
 
   it("devrait grouper les villes par pays, la France d'abord, les villes par ordre alphabétique", () => {
-    expect(CITY_GROUPS.flatMap((group) => group.cities)).toHaveLength(CITY_KEYS.length);
-    expect(CITY_GROUPS[0]).toMatchObject({ country: "FR", label: "France" });
-    expect(CITY_GROUPS[0].cities.slice(0, 3)).toEqual(["ajaccio", "bordeaux", "lille"]);
-    expect(CITY_GROUPS.find((group) => group.country === "CA")?.cities).toEqual(["moncton", "montreal", "quebec"]);
+    expect(CITY_GROUPS.fr.flatMap((group) => group.cities)).toHaveLength(CITY_KEYS.length);
+    expect(CITY_GROUPS.fr[0]).toMatchObject({ country: "FR", label: "France" });
+    expect(CITY_GROUPS.fr[0].cities.slice(0, 3)).toEqual(["ajaccio", "bordeaux", "lille"]);
+    expect(CITY_GROUPS.fr.find((group) => group.country === "CA")?.cities).toEqual(["moncton", "montreal", "quebec"]);
+  });
+
+  it("devrait nommer les pays en anglais et ranger leurs villes par leur nom anglais", () => {
+    expect(CITY_GROUPS.en.flatMap((group) => group.cities)).toHaveLength(CITY_KEYS.length);
+    expect(CITY_GROUPS.en.find((group) => group.country === "BE")).toMatchObject({ label: "Belgium", cities: ["bruxelles", "liege"] });
+    expect(CITY_GROUPS.en.find((group) => group.country === "DZ")?.label).toBe("Algeria");
   });
 });
 
 describe("NATAL_STRINGS", () => {
-  it("devrait tenir, avec les villes, dans les 9 000 caractères alloués au calculateur", () => {
-    const size = sizeOf(S) + sizeOf(CITY_STRINGS);
-    expect(size, `natal ${sizeOf(S)}, villes ${sizeOf(CITY_STRINGS)}`).toBeLessThanOrEqual(9000);
+  it.each(LOCALES)("devrait tenir, avec les villes, dans les 9 000 caractères alloués au calculateur (%s)", (locale) => {
+    const natal = sizeOf(NATAL_STRINGS[locale]);
+    const cities = sizeOf(CITY_STRINGS[locale]);
+    expect(natal + cities, `natal ${natal}, villes ${cities}`).toBeLessThanOrEqual(9000);
   });
 
   it("devrait calculer les libellés de l'heure répétée à partir des décalages", () => {
@@ -53,6 +63,13 @@ describe("NATAL_STRINGS", () => {
       "Soleil en Cancer, Lune en Gémeaux, Ascendant Scorpion.",
     );
     expect(S.bigThree("Cancer", "Gémeaux", null).join("")).toMatch(/^Soleil en Cancer, Lune en Gémeaux\. Sans l'heure/);
+  });
+
+  it("devrait composer en anglais les libellés de l'heure répétée et la phrase de synthèse", () => {
+    const en = NATAL_STRINGS.en;
+    expect(en.choice(false, en.utc("+2"), true)).toBe("First time (summer time, UTC+2)");
+    expect(en.bigThree("Cancer", "Gemini", "Scorpio").join("")).toBe("Sun in Cancer, Moon in Gemini, Ascendant Scorpio.");
+    expect(en.dominants(["Fire"], ["Cardinal", "Fixed"])).toBe("Dominants: Fire; Cardinal and Fixed.");
   });
 
   it("devrait nommer les éléments puis les modalités dominants", () => {

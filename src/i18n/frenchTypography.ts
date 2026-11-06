@@ -27,8 +27,12 @@ export const PLACES: readonly SpacingPlace[] = [
   { name: "avant »", expected: NBSP, wrong: /([ \u202f])(?=»)/g, missing: /(?<=\S)»/g },
 ];
 
-/** Texte corrigé : chaque espace fautive remplacée, chaque espace manquante ajoutée. */
+/** Adresse (« https://… ») : ni texte affiché ni typographie ; « File: » y reste collé. */
+export const isAddress = (text: string) => /^[a-z][a-z\d+.-]*:\/\//i.test(text);
+
+/** Texte corrigé : chaque espace fautive remplacée, chaque espace manquante ajoutée. Les adresses ne sont pas touchées. */
 export function fixFrenchSpacing(text: string): string {
+  if (isAddress(text)) return text;
   let fixed = text;
   for (const { expected, wrong, missing } of PLACES) {
     fixed = fixed.replace(wrong, expected);

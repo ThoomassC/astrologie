@@ -5,6 +5,7 @@ import layout from "@/components/text/layout.module.css";
 import { PageHeader } from "@/components/text/PageHeader";
 import { getSignsContent } from "@/content/signs/content";
 import { getUiContent } from "@/content/ui/content";
+import type { Locale } from "@/i18n/locales";
 import { ELEMENT_NAMES, MODALITY_NAMES, SIGN_NAMES } from "@/i18n/names";
 import { ELEMENT_KEYS, MODALITY_KEYS, SIGN_KEYS } from "@/lib/astro/keys";
 import { SIGNS, signsOfElement, signsOfModality } from "@/lib/astro/signs";
@@ -19,12 +20,12 @@ function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-function SignLinks({ signs }: { signs: readonly (typeof SIGN_KEYS)[number][] }) {
+function SignLinks({ signs, locale }: { signs: readonly (typeof SIGN_KEYS)[number][]; locale: Locale }) {
   return (
     <ul className={styles.signLinks}>
       {signs.map((sign) => (
         <li key={sign}>
-          <Link href={signPath(sign)}>{SIGN_NAMES[sign].name}</Link>
+          <Link href={signPath(sign, locale)}>{SIGN_NAMES[locale][sign].name}</Link>
         </li>
       ))}
     </ul>
@@ -32,14 +33,14 @@ function SignLinks({ signs }: { signs: readonly (typeof SIGN_KEYS)[number][] }) 
 }
 
 /** Page des signes : galerie des douze cartels, puis éléments, modalités, tableau croisé, polarité, cuspides. */
-export function SignsIndexPage() {
-  const content = getSignsContent();
-  const ui = getUiContent().signs;
+export function SignsIndexPage({ locale }: { locale: Locale }) {
+  const content = getSignsContent(locale);
+  const ui = getUiContent(locale).signs;
   return (
     <main id={MAIN_ID} tabIndex={-1} className={layout.page}>
-      <PageHeader title={content.index.title} lead={content.index.lead} />
+      <PageHeader title={content.index.title} lead={content.index.lead} locale={locale} />
       <div className={layout.stack}>
-        <ExplainedText text={content.index.intro} subject={content.index.title} />
+        <ExplainedText text={content.index.intro} subject={content.index.title} locale={locale} />
 
         <section aria-labelledby="galerie">
           <h2 id="galerie" className="sr-only">
@@ -47,7 +48,7 @@ export function SignsIndexPage() {
           </h2>
           <ul className={styles.gallery}>
             {SIGN_KEYS.map((sign) => (
-              <SignCard key={sign} sign={sign} keywords={content.signs[sign].keywords} />
+              <SignCard key={sign} sign={sign} keywords={content.signs[sign].keywords} locale={locale} />
             ))}
           </ul>
         </section>
@@ -63,11 +64,12 @@ export function SignsIndexPage() {
                 id={`element-${element}`}
                 level={3}
                 text={content.elements[element]}
+                locale={locale}
                 className={styles.elementBlock}
                 lead={
                   <div style={{ "--pastille": ELEMENT_COLORS[element] } as CSSProperties} className={styles.elementLead}>
-                    <span className={styles.pastille}>{capitalize(ELEMENT_NAMES[element].signs)}</span>
-                    <SignLinks signs={signsOfElement(element)} />
+                    <span className={styles.pastille}>{capitalize(ELEMENT_NAMES[locale][element].signs)}</span>
+                    <SignLinks signs={signsOfElement(element)} locale={locale} />
                   </div>
                 }
               />
@@ -86,7 +88,8 @@ export function SignsIndexPage() {
                 id={`modalite-${modality}`}
                 level={3}
                 text={content.modalities[modality]}
-                lead={<SignLinks signs={signsOfModality(modality)} />}
+                locale={locale}
+                lead={<SignLinks signs={signsOfModality(modality)} locale={locale} />}
               />
             ))}
           </div>
@@ -100,7 +103,7 @@ export function SignsIndexPage() {
                   {ELEMENT_KEYS.map((element) => (
                     <th key={element} scope="col">
                       <span className={styles.pastille} style={{ "--pastille": ELEMENT_COLORS[element] } as CSSProperties}>
-                        {ELEMENT_NAMES[element].name}
+                        {ELEMENT_NAMES[locale][element].name}
                       </span>
                     </th>
                   ))}
@@ -109,10 +112,10 @@ export function SignsIndexPage() {
               <tbody>
                 {MODALITY_KEYS.map((modality) => (
                   <tr key={modality}>
-                    <th scope="row">{MODALITY_NAMES[modality].name}</th>
+                    <th scope="row">{MODALITY_NAMES[locale][modality].name}</th>
                     {ELEMENT_KEYS.map((element) => {
                       const sign = SIGN_KEYS.find((s) => SIGNS[s].element === element && SIGNS[s].modality === modality);
-                      return <td key={element}>{sign ? <Link href={signPath(sign)}>{SIGN_NAMES[sign].name}</Link> : null}</td>;
+                      return <td key={element}>{sign ? <Link href={signPath(sign, locale)}>{SIGN_NAMES[locale][sign].name}</Link> : null}</td>;
                     })}
                   </tr>
                 ))}
@@ -122,8 +125,8 @@ export function SignsIndexPage() {
         </section>
 
         <div className={layout.cards}>
-          <ExplainedSection id="polarite" level={3} text={content.polarity} className={layout.card} />
-          <ExplainedSection id="cuspides" level={3} text={content.cusps} className={layout.card} />
+          <ExplainedSection id="polarite" level={3} text={content.polarity} locale={locale} className={layout.card} />
+          <ExplainedSection id="cuspides" level={3} text={content.cusps} locale={locale} className={layout.card} />
         </div>
       </div>
     </main>

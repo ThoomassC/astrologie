@@ -15,7 +15,7 @@ describe("formatPosition", () => {
     [102.0655, `12°03${PRIME}${NBSP}Cancer`],
     [42.5, `12°30${PRIME}${NBSP}Taureau`],
   ])("devrait écrire %f° « %s »", (longitude, expected) => {
-    expect(formatPosition(longitude)).toBe(expected);
+    expect(formatPosition(longitude, "fr")).toBe(expected);
   });
 
   // En double précision, 102,35 donne 12,349999999999994° dans le Cancer : tronqué tel quel, 12°20′.
@@ -24,11 +24,21 @@ describe("formatPosition", () => {
     [102.35, `12°21${PRIME}${NBSP}Cancer`],
     [42.55, `12°33${PRIME}${NBSP}Taureau`],
   ])("devrait tronquer %f° à la minute exacte malgré l'arrondi binaire : « %s »", (longitude, expected) => {
-    expect(formatPosition(longitude)).toBe(expected);
+    expect(formatPosition(longitude, "fr")).toBe(expected);
   });
 
   it("devrait écrire 29°59′, jamais 30°00′, à un cheveu de la fin du signe (29,9999999999999°)", () => {
-    expect(formatPosition(29.9999999999999)).toBe(`29°59${PRIME}${NBSP}Bélier`);
+    expect(formatPosition(29.9999999999999, "fr")).toBe(`29°59${PRIME}${NBSP}Bélier`);
+  });
+});
+
+describe("formatPosition en anglais", () => {
+  it.each([
+    [0, `0°00${PRIME}${NBSP}Aries`],
+    [359.99, `29°59${PRIME}${NBSP}Pisces`],
+    [215.5, `5°30${PRIME}${NBSP}Scorpio`],
+  ])("devrait écrire %f° « %s », le signe nommé en anglais", (longitude, expected) => {
+    expect(formatPosition(longitude, "en")).toBe(expected);
   });
 });
 

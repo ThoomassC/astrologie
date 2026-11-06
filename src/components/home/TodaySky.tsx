@@ -4,14 +4,16 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Glyph } from "@/components/glyphs/Glyph";
 import { ZodiacWheel } from "@/components/wheel/ZodiacWheel";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { Locale } from "@/i18n/locales";
 import { POINT_NAMES, SIGN_NAMES } from "@/i18n/names";
 import { formatDegreeInSign } from "@/i18n/positions";
 import { ASPECTS } from "@/lib/astro/aspectData";
 import { type AspectKey, CHART_POINT_KEYS, type ChartPointKey, type MAJOR_ASPECT_KEYS, PLANET_KEYS } from "@/lib/astro/keys";
 import { moonPhase } from "@/lib/astro/moonPhase";
 import type { computeSky } from "@/lib/astro/sky";
-import { lexiconPath, planetPath, SECTION_PATHS, signPath } from "@/lib/site/routes";
-import { HOME_STRINGS as S } from "./home.strings";
+import { lexiconPath, planetPath, sectionPath, signPath } from "@/lib/site/routes";
+import { HOME_STRINGS } from "./home.strings";
 import styles from "./home.module.css";
 
 type Sky = ReturnType<typeof computeSky>;
@@ -26,8 +28,8 @@ const NBSP = "\u00a0";
 
 const isMajor = (key: AspectKey): key is MajorAspectKey => ASPECTS[key].family === "major";
 
-function pointPath(key: ChartPointKey): string {
-  return key === "northNode" ? `${SECTION_PATHS.planets}#${NODES_ANCHOR}` : planetPath(key);
+function pointPath(key: ChartPointKey, locale: Locale): string {
+  return key === "northNode" ? `${sectionPath("planets", locale)}#${NODES_ANCHOR}` : planetPath(key, locale);
 }
 
 const SWATCH: Readonly<Record<MajorAspectKey, string | null>> = {
@@ -55,6 +57,10 @@ function Swatch({ aspect }: { aspect: MajorAspectKey }) {
  * vers les astres, les signes, la rétrogradation) et aspects majeurs. Un échec propose de recalculer.
  */
 export function TodaySky() {
+  const locale = useLocale();
+  const S = HOME_STRINGS[locale];
+  const signs = SIGN_NAMES[locale];
+  const names = POINT_NAMES[locale];
   const [state, setState] = useState<State>({ status: "loading" });
   const [attempt, setAttempt] = useState(0);
   const statusRef = useRef<HTMLParagraphElement>(null);
@@ -121,16 +127,16 @@ export function TodaySky() {
         <p className={styles.heroLead}>{S.lead}</p>
         {sky ? (
           <p className={styles.sentence}>
-            {S.sun(SIGN_NAMES[sky.positions.sun.sign].the)}{" "}
-            {S.moon(S.phases[moonPhase(sky.positions.sun.longitude, sky.positions.moon.longitude)], SIGN_NAMES[sky.positions.moon.sign].name)}{" "}
-            {retrogrades.length > 0 ? S.retrogrades(retrogrades.map((k) => POINT_NAMES[k].name)) : S.noRetrograde}
+            {S.sun(signs[sky.positions.sun.sign].the)}{" "}
+            {S.moon(S.phases[moonPhase(sky.positions.sun.longitude, sky.positions.moon.longitude)], signs[sky.positions.moon.sign].name)}{" "}
+            {retrogrades.length > 0 ? S.retrogrades(retrogrades.map((k) => names[k].name)) : S.noRetrograde}
           </p>
         ) : null}
         <p className={styles.actions}>
-          <Link className="bouton" href={SECTION_PATHS.natal}>
+          <Link className="bouton" href={sectionPath("natal", locale)}>
             {S.natalCta}
           </Link>
-          <Link className="bouton bouton-second" href={SECTION_PATHS.signs}>
+          <Link className="bouton bouton-second" href={sectionPath("signs", locale)}>
             {S.signsCta}
           </Link>
         </p>
@@ -139,6 +145,7 @@ export function TodaySky() {
         <ZodiacWheel
           titleId="roue-du-jour"
           title={S.wheelTitle}
+          locale={locale}
           descriptionId="positions-du-jour"
           points={points}
           aspects={drawnAspects}
@@ -154,18 +161,18 @@ export function TodaySky() {
               <li key={key} className={position ? undefined : styles.placeholder}>
                 <Glyph name={key} size={22} className={styles.positionGlyph} />
                 <span className={styles.positionName}>
-                  <Link href={pointPath(key)}>{POINT_NAMES[key].name}</Link>
+                  <Link href={pointPath(key, locale)}>{names[key].name}</Link>
                 </span>
                 <span className={styles.positionValue}>
                   {position ? (
                     <>
                       {formatDegreeInSign(position.longitude)}
                       {NBSP}
-                      <Link href={signPath(position.sign)}>{SIGN_NAMES[position.sign].name}</Link>
+                      <Link href={signPath(position.sign, locale)}>{signs[position.sign].name}</Link>
                       {position.motion === "retrograde" ? (
                         <>
                           {" "}
-                          <Link href={lexiconPath(RETROGRADE_ENTRY)} className={styles.retro}>
+                          <Link href={lexiconPath(RETROGRADE_ENTRY, locale)} className={styles.retro}>
                             {S.retrograde}
                           </Link>
                         </>
@@ -187,7 +194,7 @@ export function TodaySky() {
                 {majorAspects.map((aspect) => (
                   <li key={`${aspect.a}-${aspect.b}-${aspect.key}`}>
                     <Swatch aspect={aspect.key} />
-                    {S.aspectLine(POINT_NAMES[aspect.a].the, POINT_NAMES[aspect.b].the, S.aspectIn[aspect.key])}
+                    {S.aspectLine(names[aspect.a].the, names[aspect.b].the, S.aspectIn[aspect.key])}
                   </li>
                 ))}
               </ul>

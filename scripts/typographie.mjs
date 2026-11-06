@@ -18,6 +18,8 @@ const PLACES = [
 ];
 
 function fix(text, whole) {
+  // Adresse (« https://… ») : pas de typographie, « File: » reste collé.
+  if (/^[a-z][a-z\d+.-]*:\/\//i.test(text)) return text;
   let fixed = text;
   for (const { expected, wrong, missing } of PLACES) {
     fixed = fixed.replace(wrong, expected);

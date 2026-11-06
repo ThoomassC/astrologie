@@ -14,11 +14,25 @@ import { getPlanetsContent } from "@/content/planets/content";
 import { getScienceContent } from "@/content/science/content";
 import { getSignsContent } from "@/content/signs/content";
 import { getUiContent } from "@/content/ui/content";
+import { LOCALES, type Locale } from "./locales";
+import {
+  ANGLE_ABBREVIATIONS,
+  ASPECT_NAMES,
+  CONSTELLATION_NAMES,
+  ELEMENT_NAMES,
+  HOUSE_SYSTEM_NAMES,
+  MODALITY_NAMES,
+  MONTH_NAMES,
+  PLANET_GROUP_NAMES,
+  POINT_NAMES,
+  SIGN_NAMES,
+} from "./names";
 
 /*
- * Outils des gardes transversales des textes (typographie française, complétude, budget des chaînes client, frontière
- * serveur/client) : tous les textes du site, et le code qui les écrit. Réservé aux tests, lancés depuis la racine du
- * dépôt comme le fait Vitest : il lit le disque et charge tous les contenus.
+ * Outils des gardes transversales des textes (typographie française, complétude des langues, budget des chaînes
+ * client, frontière serveur/client) : tous les textes du site, dans les deux langues, et le code qui les écrit.
+ * Réservé aux tests, lancés depuis la racine du dépôt comme le fait Vitest : il lit le disque et charge tous les
+ * contenus.
  */
 
 const ROOT = process.cwd();
@@ -41,8 +55,8 @@ export function parseSource(file: string): ts.SourceFile {
   return ts.createSourceFile(file, readSource(file), ts.ScriptTarget.Latest, true, kind);
 }
 
-/** Contenus serveur, un par domaine de `src/content/`. */
-export const SERVER_CONTENTS: Readonly<Record<string, () => object>> = {
+/** Contenus serveur, un par domaine de `src/content/`, lus dans une langue. */
+export const SERVER_CONTENTS: Readonly<Record<string, (locale: Locale) => object>> = {
   about: getAboutContent,
   aspects: getAspectsContent,
   common: getCommonContent,
@@ -58,14 +72,31 @@ export const SERVER_CONTENTS: Readonly<Record<string, () => object>> = {
   ui: getUiContent,
 };
 
-/** Une table de chaînes client : son export (`SITE_STRINGS`), son fichier, ses textes. */
+/** Noms affichés (`src/i18n/names.ts`), table par table, chacune indexée par la langue. */
+export const NAME_TABLES: Readonly<Record<string, Readonly<Record<Locale, unknown>>>> = {
+  SIGN_NAMES,
+  POINT_NAMES,
+  ANGLE_ABBREVIATIONS,
+  ELEMENT_NAMES,
+  MODALITY_NAMES,
+  PLANET_GROUP_NAMES,
+  ASPECT_NAMES,
+  HOUSE_SYSTEM_NAMES,
+  CONSTELLATION_NAMES,
+  MONTH_NAMES,
+};
+
+/** Une table de chaînes client : son export (`SITE_STRINGS`), son fichier, ses textes par langue. */
 export interface StringTable {
   name: string;
   file: string;
-  strings: unknown;
+  strings: Readonly<Record<Locale, unknown>>;
 }
 
-/** Toutes les tables de chaînes client : chaque export `*_STRINGS` des fichiers `*.strings.ts`, découverts sur le disque. */
+/**
+ * Toutes les tables de chaînes client : chaque export `*_STRINGS` des fichiers `*.strings.ts`, découverts sur le disque.
+ * Aucune liste à tenir : une table neuve est gardée dès sa création.
+ */
 export async function loadStringTables(): Promise<StringTable[]> {
   const files = sourceFiles().filter((file) => file.endsWith(".strings.ts"));
   const tables = await Promise.all(
@@ -73,7 +104,7 @@ export async function loadStringTables(): Promise<StringTable[]> {
       const exports = (await import(/* @vite-ignore */ join(ROOT, file))) as Record<string, unknown>;
       return Object.entries(exports)
         .filter(([name]) => name.endsWith("_STRINGS"))
-        .map(([name, strings]) => ({ name, file, strings }));
+        .map(([name, strings]) => ({ name, file, strings: strings as Readonly<Record<Locale, unknown>> }));
     }),
   );
   return tables.flat();
@@ -86,8 +117,8 @@ export interface TextLeaf {
   value: string | TextFunction;
 }
 
-/** Clés qui ne portent pas de texte affiché : adresses, ancres, clés d'images. */
-const NOT_TEXT_KEYS: ReadonlySet<string> = new Set(["href", "id", "key", "see", "pageHref", "licenseHref"]);
+/** Clés qui ne portent pas de texte affiché : adresses, ancres, clés d'images, nature d'un bloc (« p », « list »). */
+const NOT_TEXT_KEYS: ReadonlySet<string> = new Set(["href", "id", "key", "kind", "see", "pageHref", "licenseHref"]);
 
 /** Feuilles de texte d'un contenu ou d'une table, dans l'ordre de l'objet ; nombres et booléens exclus. */
 export function textLeaves(value: unknown, path = ""): TextLeaf[] {
@@ -109,22 +140,44 @@ export function stringLeaves(value: unknown): { path: string; text: string }[] {
 export interface SourceLiteral {
   file: string;
   line: number;
+  /** Texte, échappements résolus (« \u00a0 » devient l'espace insécable). */
   text: string;
+  /**
+   * Langue que le code donne au littéral, du plus proche au plus lointain : propriété `fr` ou `en` (tables, noms) ;
+   * déclaration nommée en `_FR` ou en `Fr` (`HOME_FR`, `creditLineFr`) ; fichier `fr.ts` ou `en.ts` (contenus
+   * serveur). null ailleurs : code commun, messages pour les développeurs.
+   */
+  language: Locale | null;
+}
+
+/** Langue d'un nom de déclaration : `HOME_FR`, `creditLineEn` ; null pour `SIGN_SLUGS`, `LIST`. */
+function languageOfName(name: string): Locale | null {
+  const match = /(?:_|[a-z\d])(FR|EN)$|(?<=[a-z\d])(Fr|En)$/.exec(name);
+  const code = (match?.[1] ?? match?.[2])?.toLowerCase();
+  return LOCALES.find((locale) => locale === code) ?? null;
+}
+
+/** Langue que porte un nœud du code par lui-même : propriété `fr`, déclaration `HOME_FR` ; null sinon. */
+function languageOfNode(node: ts.Node): Locale | null {
+  if (ts.isPropertyAssignment(node) && (ts.isIdentifier(node.name) || ts.isStringLiteral(node.name))) {
+    return LOCALES.find((locale) => locale === node.name.getText().replace(/^["']|["']$/g, "")) ?? null;
+  }
+  if ((ts.isVariableDeclaration(node) || ts.isFunctionDeclaration(node)) && node.name && ts.isIdentifier(node.name)) {
+    return languageOfName(node.name.text);
+  }
+  return null;
 }
 
 const isModuleSpecifier = (node: ts.Node) =>
   ts.isImportDeclaration(node.parent) || ts.isExportDeclaration(node.parent) || ts.isExternalModuleReference(node.parent);
 
-/** Fichiers qui écrivent du texte affiché : contenus `fr.ts`, tables `*.strings.ts`, noms (`src/i18n/names.ts`). */
-export function isFrenchTextFile(file: string): boolean {
-  return file.endsWith("/fr.ts") || file.endsWith(".strings.ts") || file === "src/i18n/names.ts";
-}
-
 /** Littéraux de chaîne d'un fichier source (chaînes et morceaux de gabarits), chemins de modules exclus. */
 export function sourceLiterals(file: string): SourceLiteral[] {
   const source = parseSource(file);
+  const fileLanguage = LOCALES.find((locale) => file.endsWith(`/${locale}.ts`)) ?? null;
   const literals: SourceLiteral[] = [];
-  const visit = (node: ts.Node) => {
+  const visit = (node: ts.Node, language: Locale | null) => {
+    const own = languageOfNode(node) ?? language;
     const isText =
       ts.isStringLiteral(node) ||
       ts.isNoSubstitutionTemplateLiteral(node) ||
@@ -133,10 +186,10 @@ export function sourceLiterals(file: string): SourceLiteral[] {
       ts.isTemplateTail(node);
     if (isText && !isModuleSpecifier(node)) {
       const line = source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1;
-      literals.push({ file, line, text: node.text });
+      literals.push({ file, line, text: node.text, language: own });
     }
-    ts.forEachChild(node, visit);
+    ts.forEachChild(node, (child) => visit(child, own));
   };
-  visit(source);
+  visit(source, fileLanguage);
   return literals;
 }

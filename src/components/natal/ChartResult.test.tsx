@@ -7,9 +7,13 @@ import { formatPosition } from "@/i18n/positions";
 import { type BirthFormValues, parseBirthInput } from "@/lib/astro/birthInput";
 import { computeNatalChart } from "@/lib/astro/chart";
 import { ChartResult } from "./ChartResult";
-import { NATAL_STRINGS as S } from "./natal.strings";
+import { NATAL_STRINGS } from "./natal.strings";
 import { INFO_STRINGS } from "@/components/text/info.strings";
-import { READING_STRINGS as R } from "./reading.strings";
+import { READING_STRINGS } from "./reading.strings";
+
+const R = READING_STRINGS.fr;
+
+const S = NATAL_STRINGS.fr;
 
 // Sans les globales de Vitest, Testing Library ne démonte pas seul les rendus entre deux tests.
 afterEach(cleanup);
@@ -52,7 +56,7 @@ const section = (title: string) => {
 };
 /** Paragraphes de la bulle « i » d'un sujet (le panneau existe dans le DOM, même fermé). */
 const tip = (subject: string) => {
-  const button = screen.getByRole("button", { name: INFO_STRINGS.label(subject) });
+  const button = screen.getByRole("button", { name: INFO_STRINGS.fr.label(subject) });
   const panel = document.getElementById(button.getAttribute("popovertarget") ?? "");
   if (panel === null) throw new Error(`bulle « ${subject} » sans panneau`);
   const paragraphs = [...panel.querySelectorAll("p")].map((p) => p.textContent);
@@ -64,8 +68,8 @@ describe("ChartResult — heure connue", () => {
     show();
     const summary = screen.getByText((_, element) => element?.tagName === "P" && /^Soleil en Cancer/.test(element.textContent ?? ""));
     expect(summary).toHaveTextContent("Soleil en Cancer, Lune en Gémeaux, Ascendant Balance.");
-    expect(within(summary).getByRole("link", { name: "Cancer" })).toHaveAttribute("href", "/signes/cancer");
-    expect(within(summary).getByRole("link", { name: "Balance" })).toHaveAttribute("href", "/signes/balance");
+    expect(within(summary).getByRole("link", { name: "Cancer" })).toHaveAttribute("href", "/fr/signes/cancer");
+    expect(within(summary).getByRole("link", { name: "Balance" })).toHaveAttribute("href", "/fr/signes/balance");
     expect(screen.getByText("3 juillet 2024 à 14:30, Paris (France)")).toBeInTheDocument();
     expect(tip(S.calculationTitle)).toEqual([S.noteInstant("3 juillet 2024", "12:30", "+02:00", false), S.notKept]);
   });
@@ -92,9 +96,9 @@ describe("ChartResult — heure connue", () => {
     expect(first.children).toHaveLength(3);
     const house = chart.positions.sun.house;
     if (house === null) throw new Error("maison du Soleil attendue");
-    const sun = R.sentence(POINT_NAMES.sun.the, R.planetDomain.sun, SIGN_NAMES.cancer.of, R.signManner.cancer, R.houseArea[house]);
+    const sun = R.sentence(POINT_NAMES.fr.sun.the, R.planetDomain.sun, SIGN_NAMES.fr.cancer.of, R.signManner.cancer, R.houseArea[house]);
     expect(within(first).getByText(plain(sun))).toBeInTheDocument();
-    expect(within(first).getByText(plain(R.ascendantSentence(SIGN_NAMES.libra.of, R.signManner.libra)))).toBeInTheDocument();
+    expect(within(first).getByText(plain(R.ascendantSentence(SIGN_NAMES.fr.libra.of, R.signManner.libra)))).toBeInTheDocument();
     expect(others.closest("details")).not.toHaveAttribute("open");
     expect(others.children).toHaveLength(8);
     expect(tip(R.title)).toEqual([R.intro, R.caveat]);
@@ -105,21 +109,21 @@ describe("ChartResult — heure connue", () => {
     const table = screen.getByRole("table", { name: S.positionsTitle });
     expect(screen.getByRole("img", { name: S.wheelLabel(true) })).toHaveAttribute("aria-describedby", table.id);
     expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual([...S.positionHeaders]);
-    expect(within(table).getByRole("link", { name: S.positionHeaders[3] })).toHaveAttribute("href", "/lexique#retrogradation");
+    expect(within(table).getByRole("link", { name: S.positionHeaders[3] })).toHaveAttribute("href", "/fr/lexique#retrogradation");
     expect(within(table).getAllByRole("row")).toHaveLength(12);
     expect(section(S.positionsTitle)).toHaveTextContent(plain(S.positionsSummary(["Saturne", "Neptune", "Pluton"])));
 
-    const sun = within(table).getByRole("row", { name: new RegExp(`^${POINT_NAMES.sun.name}`) });
-    expect(within(sun).getByRole("link", { name: POINT_NAMES.sun.name })).toHaveAttribute("href", "/planetes/soleil");
-    expect(sun).toHaveTextContent(plain(formatPosition(chart.positions.sun.longitude)));
+    const sun = within(table).getByRole("row", { name: new RegExp(`^${POINT_NAMES.fr.sun.name}`) });
+    expect(within(sun).getByRole("link", { name: POINT_NAMES.fr.sun.name })).toHaveAttribute("href", "/fr/planetes/soleil");
+    expect(sun).toHaveTextContent(plain(formatPosition(chart.positions.sun.longitude, "fr")));
     expect(within(sun).getByRole("link", { name: /^Maison [IVX]+$/ })).toHaveAttribute(
       "href",
-      `/maisons#maison-${chart.positions.sun.house}`,
+      `/fr/maisons#maison-${chart.positions.sun.house}`,
     );
-    const neptune = within(table).getByRole("row", { name: new RegExp(`^${POINT_NAMES.neptune.name}`) });
+    const neptune = within(table).getByRole("row", { name: new RegExp(`^${POINT_NAMES.fr.neptune.name}`) });
     expect(neptune).toHaveTextContent(S.motion.stationary);
-    const node = within(table).getByRole("row", { name: new RegExp(`^${POINT_NAMES.northNode.name}`) });
-    expect(within(node).queryByRole("link", { name: POINT_NAMES.northNode.name })).toBeNull();
+    const node = within(table).getByRole("row", { name: new RegExp(`^${POINT_NAMES.fr.northNode.name}`) });
+    expect(within(node).queryByRole("link", { name: POINT_NAMES.fr.northNode.name })).toBeNull();
   });
 
   it("devrait résumer les aspects puis les détailler, majeurs puis mineurs, l'orbe menant au lexique", () => {
@@ -127,7 +131,7 @@ describe("ChartResult — heure connue", () => {
     expect(section(S.aspectsTitle)).toHaveTextContent(plain(S.aspectsSummary(20, 5)));
     const majors = screen.getByRole("table", { name: S.majorAspects });
     expect(within(majors).getAllByRole("row")).toHaveLength(21);
-    expect(within(majors).getByRole("link", { name: S.aspectHeaders[2] })).toHaveAttribute("href", "/lexique#orbe");
+    expect(within(majors).getByRole("link", { name: S.aspectHeaders[2] })).toHaveAttribute("href", "/fr/lexique#orbe");
     // Un aspect à un angle n'a pas de vitesse : ni appliquant ni séparant.
     expect(within(majors).getAllByText(S.noPhaseSpoken).length).toBeGreaterThan(0);
     expect(within(screen.getByRole("table", { name: S.minorAspects(5) })).getAllByRole("row")).toHaveLength(6);
@@ -150,10 +154,10 @@ describe("ChartResult — heure connue", () => {
     const { chart } = show();
     const houses = section(S.housesTitle);
     const { ascendant, midheaven } = chart.angles ?? { ascendant: Number.NaN, midheaven: Number.NaN };
-    expect(houses).toHaveTextContent(plain(S.housesSummary("Placidus", formatPosition(ascendant), formatPosition(midheaven))));
+    expect(houses).toHaveTextContent(plain(S.housesSummary("Placidus", formatPosition(ascendant, "fr"), formatPosition(midheaven, "fr"))));
     const cusps = within(houses).getByRole("table", { name: S.cusps("Placidus") });
     expect(within(cusps).getAllByRole("row")).toHaveLength(13);
-    expect(within(cusps).getByRole("link", { name: S.cuspHeaders[1] })).toHaveAttribute("href", "/lexique#cuspide");
+    expect(within(cusps).getByRole("link", { name: S.cuspHeaders[1] })).toHaveAttribute("href", "/fr/lexique#cuspide");
   });
 
   it("devrait rendre la main au formulaire par « Modifier la saisie », en tête comme en fin", async () => {

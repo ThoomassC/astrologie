@@ -8,20 +8,21 @@ import { getHistoryContent } from "@/content/history/content";
 import { HISTORY_ERA_IDS } from "@/content/history/types";
 import { getImagesContent } from "@/content/images/content";
 import { getUiContent } from "@/content/ui/content";
+import type { Locale } from "@/i18n/locales";
 import { MAIN_ID } from "@/lib/site/ids";
 import { HISTORY_IMAGES } from "@/lib/site/images";
 import styles from "./history.module.css";
 
 /** Histoire : une frise de huit époques, de Babylone aux applications ; chacune un résumé, une estampe, des détails. */
-export function HistoryPage() {
-  const content = getHistoryContent();
-  const credits = getImagesContent().history;
-  const ui = getUiContent();
+export function HistoryPage({ locale }: { locale: Locale }) {
+  const content = getHistoryContent(locale);
+  const credits = getImagesContent(locale).history;
+  const ui = getUiContent(locale);
   return (
     <main id={MAIN_ID} tabIndex={-1} className={layout.page}>
-      <PageHeader title={content.title} lead={content.lead} />
+      <PageHeader title={content.title} lead={content.lead} locale={locale} />
       <div className={layout.stack}>
-        <ExplainedText text={content.intro} subject={content.title} />
+        <ExplainedText text={content.intro} subject={content.title} locale={locale} />
         <ol className={styles.timeline}>
           {HISTORY_ERA_IDS.map((id) => {
             const era = content.eras[id];
@@ -37,11 +38,12 @@ export function HistoryPage() {
                       alt={era.image.alt}
                       caption={era.image.caption}
                       credit={credits[era.image.key]}
+                      locale={locale}
                       sizes="(min-width: 960px) 40rem, 92vw"
                       className={styles.eraImage}
                     />
                   ) : null}
-                  <Details subject={era.heading}>
+                  <Details subject={era.heading} locale={locale}>
                     <Blocks blocks={era.details} />
                     {era.sources.length > 0 ? (
                       <div className={styles.sources}>

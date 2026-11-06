@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { GlyphShape } from "@/components/glyphs/Glyph";
+import type { Locale } from "@/i18n/locales";
 import { ANGLE_ABBREVIATIONS } from "@/i18n/names";
 import { ASPECTS } from "@/lib/astro/aspectData";
 import type { AspectKey, ChartPointKey, ElementKey, Longitude, SignKey } from "@/lib/astro/keys";
@@ -30,6 +31,8 @@ export interface ZodiacWheelProps {
   /** Identifiant du titre SVG (unique dans la page) et le titre lui-même : nom accessible de la roue. */
   readonly titleId: string;
   readonly title: string;
+  /** Langue des abréviations des angles (AS, MC… ; AC, MC… en anglais). */
+  readonly locale: Locale;
   /** Élément qui décrit la roue en mots ou en tableau (`aria-describedby`). */
   readonly descriptionId?: string;
   /** Longitude posée à gauche (9 h) : l'Ascendant d'un thème, 0° Bélier sinon. */
@@ -85,6 +88,7 @@ function ticksPath(left: Longitude): string {
 export function ZodiacWheel({
   titleId,
   title,
+  locale,
   descriptionId,
   leftLongitude = 0,
   cusps,
@@ -183,7 +187,7 @@ export function ZodiacWheel({
             const at = toXY(longitude + 4, innerEdge - 22, left);
             return (
               <text key={key} x={at.x} y={at.y}>
-                {ANGLE_ABBREVIATIONS[key]}
+                {ANGLE_ABBREVIATIONS[locale][key]}
               </text>
             );
           })}

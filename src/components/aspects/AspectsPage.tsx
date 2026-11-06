@@ -3,6 +3,7 @@ import layout from "@/components/text/layout.module.css";
 import { PageHeader } from "@/components/text/PageHeader";
 import { Glyph, hasGlyph } from "@/components/glyphs/Glyph";
 import { getAspectsContent } from "@/content/aspects/content";
+import type { Locale } from "@/i18n/locales";
 import { ASPECTS } from "@/lib/astro/aspectData";
 import { MAJOR_ASPECT_KEYS, MINOR_ASPECT_KEYS } from "@/lib/astro/keys";
 import { MAIN_ID } from "@/lib/site/ids";
@@ -11,13 +12,14 @@ import styles from "@/components/houses/housesPage.module.css";
 import { AspectExplorer } from "./AspectExplorer";
 
 /** Page des aspects : l'explorateur, les cinq majeurs, les mineurs, orbes, aspects appliquants, configurations. */
-export function AspectsPage() {
-  const content = getAspectsContent();
+export function AspectsPage({ locale }: { locale: Locale }) {
+  const content = getAspectsContent(locale);
   const section = (key: (typeof MAJOR_ASPECT_KEYS)[number] | (typeof MINOR_ASPECT_KEYS)[number]) => (
     <ExplainedSection
       key={key}
       id={ASPECT_ANCHORS[key]}
       text={content.aspects[key]}
+      locale={locale}
       className={styles.house}
       lead={
         <div className={styles.aspectLead}>
@@ -34,16 +36,16 @@ export function AspectsPage() {
   );
   return (
     <main id={MAIN_ID} tabIndex={-1} className={layout.page}>
-      <PageHeader title={content.index.title} lead={content.index.lead} />
+      <PageHeader title={content.index.title} lead={content.index.lead} locale={locale} />
       <div className={layout.stack}>
-        <ExplainedText text={content.index.intro} subject={content.index.title} />
+        <ExplainedText text={content.index.intro} subject={content.index.title} locale={locale} />
         <AspectExplorer />
         <div className={styles.houses}>{MAJOR_ASPECT_KEYS.map(section)}</div>
         <div className={styles.houses}>{MINOR_ASPECT_KEYS.map(section)}</div>
         <div className={layout.cards}>
-          <ExplainedSection id="orbes" level={3} text={content.orbs} className={layout.card} />
-          <ExplainedSection id="appliquant-separant" level={3} text={content.applying} className={layout.card} />
-          <ExplainedSection id="configurations" level={3} text={content.patterns} className={layout.card} />
+          <ExplainedSection id="orbes" level={3} text={content.orbs} locale={locale} className={layout.card} />
+          <ExplainedSection id="appliquant-separant" level={3} text={content.applying} locale={locale} className={layout.card} />
+          <ExplainedSection id="configurations" level={3} text={content.patterns} locale={locale} className={layout.card} />
         </div>
       </div>
     </main>

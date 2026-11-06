@@ -30,18 +30,20 @@ describe("clockOffset et shortOffset", () => {
 describe("dates et heures", () => {
   it("devrait écrire l'heure sur deux chiffres et le premier du mois en ordinal", () => {
     expect(clockTime({ hour: 9, minute: 5 })).toBe("09:05");
-    expect(longDate({ year: 2024, month: 7, day: 3 })).toBe("3 juillet 2024");
-    expect(longDate({ year: 1990, month: 5, day: 1 })).toBe("1er mai 1990");
+    expect(longDate({ year: 2024, month: 7, day: 3 }, "fr")).toBe("3 juillet 2024");
+    expect(longDate({ year: 2024, month: 7, day: 3 }, "en")).toBe("3 July 2024");
+    expect(longDate({ year: 1990, month: 5, day: 1 }, "fr")).toBe("1er mai 1990");
   });
 
   it("devrait lire un instant en temps universel, même la veille de la date locale", () => {
-    expect(utcDateTime(Date.UTC(2024, 6, 3, 12, 30))).toEqual({ date: "3 juillet 2024", time: "12:30" });
-    expect(utcDateTime(Date.UTC(1999, 11, 31, 23, 0))).toEqual({ date: "31 décembre 1999", time: "23:00" });
+    expect(utcDateTime(Date.UTC(2024, 6, 3, 12, 30), "fr")).toEqual({ date: "3 juillet 2024", time: "12:30" });
+    expect(utcDateTime(Date.UTC(1999, 11, 31, 23, 0), "fr")).toEqual({ date: "31 décembre 1999", time: "23:00" });
   });
 
   it("devrait écrire les nombres à la française", () => {
-    expect(decimal(48.85)).toBe("48,85");
-    expect(decimal(2.35221)).toBe("2,3522");
+    expect(decimal(48.85, "fr")).toBe("48,85");
+    expect(decimal(48.85, "en")).toBe("48.85");
+    expect(decimal(2.35221, "fr")).toBe("2,3522");
   });
 });
 

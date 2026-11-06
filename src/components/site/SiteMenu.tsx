@@ -2,6 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { LanguageSwitch } from "./LanguageSwitch";
 import { NavLinks } from "./NavLinks";
 import styles from "./SiteHeader.module.css";
 import { SITE_STRINGS } from "./site.strings";
@@ -10,8 +12,10 @@ import { SITE_STRINGS } from "./site.strings";
  * Menu replié des petits écrans : un `<details>` natif (il s'ouvre et se ferme sans JavaScript). Avec JavaScript, il
  * se referme après une navigation, sur Échap (le focus revient au bouton), sur un clic hors du menu et quand le focus
  * en sort (tabulation). Un focus parti nulle part (clic sur le fond du panneau, fenêtre quittée) le laisse ouvert.
+ * Sous les onglets, la ligne de la langue mène à la même page dans l'autre langue.
  */
 export function SiteMenu() {
+  const s = SITE_STRINGS[useLocale()];
   const ref = useRef<HTMLDetailsElement>(null);
   const pathname = usePathname();
 
@@ -54,11 +58,14 @@ export function SiteMenu() {
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
           <path d="M4 7h16M4 12h16M4 17h16" />
         </svg>
-        {SITE_STRINGS.menu}
+        <span className={styles.menuLabel}>{s.menu}</span>
       </summary>
-      <nav className={styles.menuPanel} aria-label={SITE_STRINGS.navLabel}>
-        <NavLinks className={styles.menuLinks} onNavigate={() => ref.current?.removeAttribute("open")} />
-      </nav>
+      <div className={styles.menuPanel}>
+        <nav aria-label={s.navLabel}>
+          <NavLinks className={styles.menuLinks} onNavigate={() => ref.current?.removeAttribute("open")} />
+        </nav>
+        <LanguageSwitch variant="menu" />
+      </div>
     </details>
   );
 }
