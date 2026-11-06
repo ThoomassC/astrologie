@@ -103,14 +103,15 @@ export interface NatalStrings {
   balanceTitle: string;
   elements: string;
   modalities: string;
-  dominantElements: (names: readonly string[]) => string;
-  dominantModalities: (names: readonly string[]) => string;
+  /** Éléments puis modalités dominants. */
+  dominants: (elements: readonly string[], modalities: readonly string[]) => string;
   readingAspects: string;
   housesTitle: string;
   housesSummary: (system: string, ascendant: string, midheaven: string) => string;
   cusps: (system: string) => string;
   cuspHeaders: readonly [string, string];
-  notesTitle: string;
+  privacyTitle: string;
+  calculationTitle: string;
   noteTimeUnknown: string;
   noteUncertain: (names: readonly string[]) => string;
   noteZone: (zone: string) => string;
@@ -225,7 +226,7 @@ export const NATAL_STRINGS: NatalStrings = {
   house: (roman) => `Maison ${roman}`,
   motion: { direct: "direct", retrograde: "rétrograde", stationary: "stationnaire" },
   aspectsTitle: "Aspects",
-  aspectsSummary: (major, minor) => `Aspects majeurs : ${major} ; aspects mineurs : ${minor}.`,
+  aspectsSummary: (major, minor) => `${major} majeurs, ${minor} mineurs.`,
   majorAspects: "Aspects majeurs",
   minorAspects: (count) => `Aspects mineurs (${count})`,
   noAspect: "Aucun aspect majeur dans ce thème.",
@@ -238,17 +239,16 @@ export const NATAL_STRINGS: NatalStrings = {
   balanceTitle: "Répartition des dix astres",
   elements: "Par élément",
   modalities: "Par modalité",
-  dominantElements: (n) => `Élément${n.length > 1 ? "s dominants" : " dominant"} : ${LIST.format(n)}.`,
-  dominantModalities: (n) => `Modalité${n.length > 1 ? "s dominantes" : " dominante"} : ${LIST.format(n)}.`,
+  dominants: (e, m) => `Dominantes : ${LIST.format(e)} ; ${LIST.format(m)}.`,
   readingAspects: "Les aspects les plus serrés",
   housesTitle: "Maisons",
-  housesSummary: (system, ascendant, midheaven) =>
-    `En ${system} : Ascendant à ${ascendant}, Milieu du Ciel à ${midheaven}.`,
+  housesSummary: (system, asc, mc) => `${system} : Ascendant ${asc}, Milieu du Ciel ${mc}.`,
   cusps: (system) => `Cuspides des douze maisons (${system})`,
   cuspHeaders: ["Maison", "Cuspide"],
-  notesTitle: "Notes sur le calcul",
+  privacyTitle: "Confidentialité",
+  calculationTitle: "le calcul",
   noteTimeUnknown: "Heure inconnue : calcul pour midi, sans Ascendant ni maisons.",
-  noteUncertain: (names) => `Signe incertain, l'astre changeant de signe ce jour-là : ${LIST.format(names)}.`,
+  noteUncertain: (n) => `Signe incertain (l'astre change de signe ce jour-là) : ${LIST.format(n)}.`,
   noteZone: (zone) =>
     `Avant 1970, l'heure légale de ce lieu a pu différer du fuseau ${zone} : vérifiez le décalage retenu (réglages avancés).`,
   noteFallback: (polar) =>

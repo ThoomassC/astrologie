@@ -8,6 +8,7 @@ import { type BirthFormValues, parseBirthInput } from "@/lib/astro/birthInput";
 import { computeNatalChart } from "@/lib/astro/chart";
 import { ChartResult } from "./ChartResult";
 import { NATAL_STRINGS as S } from "./natal.strings";
+import { INFO_STRINGS } from "@/components/text/info.strings";
 import { READING_STRINGS as R } from "./reading.strings";
 
 // Sans les globales de Vitest, Testing Library ne démonte pas seul les rendus entre deux tests.
@@ -45,21 +46,28 @@ const plain = (text: string) => text.replace(/\s+/g, " ").trim();
 
 const section = (title: string) => {
   const heading = screen.getByRole("heading", { level: 3, name: title });
-  const element = heading.parentElement;
+  const element = heading.closest("section");
   if (element === null) throw new Error(`section « ${title} » introuvable`);
   return element;
 };
-const notes = () => within(section(S.notesTitle)).getAllByRole("listitem").map((item) => item.textContent);
+/** Paragraphes de la bulle « i » d'un sujet (le panneau existe dans le DOM, même fermé). */
+const tip = (subject: string) => {
+  const button = screen.getByRole("button", { name: INFO_STRINGS.label(subject) });
+  const panel = document.getElementById(button.getAttribute("popovertarget") ?? "");
+  if (panel === null) throw new Error(`bulle « ${subject} » sans panneau`);
+  const paragraphs = [...panel.querySelectorAll("p")].map((p) => p.textContent);
+  return paragraphs.length > 0 ? paragraphs : [panel.textContent];
+};
 
 describe("ChartResult — heure connue", () => {
-  it("devrait résumer le thème, lier chaque signe à sa fiche et rappeler que rien n'est gardé", () => {
+  it("devrait résumer le thème, lier chaque signe à sa fiche, et garder les précisions du calcul dans la bulle", () => {
     show();
     const summary = screen.getByText((_, element) => element?.tagName === "P" && /^Soleil en Cancer/.test(element.textContent ?? ""));
     expect(summary).toHaveTextContent("Soleil en Cancer, Lune en Gémeaux, Ascendant Balance.");
     expect(within(summary).getByRole("link", { name: "Cancer" })).toHaveAttribute("href", "/signes/cancer");
     expect(within(summary).getByRole("link", { name: "Balance" })).toHaveAttribute("href", "/signes/balance");
     expect(screen.getByText("3 juillet 2024 à 14:30, Paris (France)")).toBeInTheDocument();
-    expect(screen.getByText(plain(S.notKept))).toBeInTheDocument();
+    expect(tip(S.calculationTitle)).toEqual([S.noteInstant("3 juillet 2024", "12:30", "+02:00", false), S.notKept]);
   });
 
   it("devrait suivre l'ordre : lecture, roue, positions, aspects, répartition, maisons, notes", () => {
@@ -71,7 +79,6 @@ describe("ChartResult — heure connue", () => {
       S.aspectsTitle,
       S.balanceTitle,
       S.housesTitle,
-      S.notesTitle,
     ]);
   });
 
@@ -90,7 +97,7 @@ describe("ChartResult — heure connue", () => {
     expect(within(first).getByText(plain(R.ascendantSentence(SIGN_NAMES.libra.of, R.signManner.libra)))).toBeInTheDocument();
     expect(others.closest("details")).not.toHaveAttribute("open");
     expect(others.children).toHaveLength(8);
-    expect(within(reading).getByText(plain(R.caveat), { selector: "p" })).toBeInTheDocument();
+    expect(tip(R.title)).toEqual([R.intro, R.caveat]);
   });
 
   it("devrait décrire la roue par le tableau des positions : onze points, maison, mouvement, lexique", () => {
@@ -129,8 +136,7 @@ describe("ChartResult — heure connue", () => {
   it("devrait nommer les dominants en résumé et écrire la répartition en nombres", () => {
     show();
     const balance = section(S.balanceTitle);
-    expect(balance).toHaveTextContent(plain(S.dominantElements(["Eau"])));
-    expect(balance).toHaveTextContent(plain(S.dominantModalities(["Fixe", "Mutable"])));
+    expect(balance).toHaveTextContent(plain(S.dominants(["Eau"], ["Fixe", "Mutable"])));
     const elements = within(screen.getByRole("heading", { level: 4, name: S.elements }).parentElement ?? balance);
     expect(elements.getAllByRole("listitem").map((item) => `${item.children[0]?.textContent}=${item.children[2]?.textContent}`)).toEqual([
       "Feu=1",
@@ -148,7 +154,6 @@ describe("ChartResult — heure connue", () => {
     const cusps = within(houses).getByRole("table", { name: S.cusps("Placidus") });
     expect(within(cusps).getAllByRole("row")).toHaveLength(13);
     expect(within(cusps).getByRole("link", { name: S.cuspHeaders[1] })).toHaveAttribute("href", "/lexique#cuspide");
-    expect(notes()).toEqual([S.noteInstant("3 juillet 2024", "12:30", "+02:00", false)]);
   });
 
   it("devrait rendre la main au formulaire par « Modifier la saisie », en tête comme en fin", async () => {
@@ -168,7 +173,8 @@ describe("ChartResult — heure inconnue et cas particuliers", () => {
     expect(screen.getByRole("img", { name: S.wheelLabel(false) })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: S.housesTitle })).toBeNull();
     expect(within(table).getAllByText(S.uncertain)).toHaveLength(2);
-    expect(notes().slice(0, 2)).toEqual([S.noteTimeUnknown, S.noteUncertain(["Lune", "Mercure"])]);
+    expect(tip(S.calculationTitle)).toContain(S.noteTimeUnknown);
+    expect(tip(S.positionsTitle)).toEqual([S.noteUncertain(["Lune", "Mercure"])]);
     expect(screen.getByText(/Sans l'heure de naissance/)).toHaveTextContent(`Lune en Taureau${S.uncertainInline}`);
 
     const [first] = within(section(R.title)).getAllByRole("list");
@@ -179,18 +185,18 @@ describe("ChartResult — heure inconnue et cas particuliers", () => {
 
   it("devrait signaler le repli de Placidus au-delà du cercle polaire (Tromsø)", () => {
     show({ place: { kind: "manual", latitude: "69,65", longitude: "18,96", timeZone: "Europe/Oslo" } });
-    expect(notes()).toContain(S.noteFallback(true));
+    expect(tip(S.housesTitle)).toEqual([S.noteFallback(true)]);
     expect(screen.getByRole("table", { name: S.cusps("Porphyre") })).toBeInTheDocument();
     expect(screen.getByText(plain(S.birth("3 juillet 2024", "14:30", S.coordinates("69,65", true, "18,96", true))))).toBeInTheDocument();
   });
 
   it("devrait demander de vérifier le décalage d'un fuseau lié avant 1970 (Montréal, 1960)", () => {
     show({ date: "1960-05-01", time: "10:00", place: { kind: "city", cityKey: "montreal" } });
-    expect(notes()).toEqual([S.noteZone("America/Montreal"), S.noteInstant("1er mai 1960", "14:00", "−04:00", false)]);
+    expect(tip(S.calculationTitle)).toEqual([S.noteInstant("1er mai 1960", "14:00", "−04:00", false), S.noteZone("America/Montreal"), S.notKept]);
   });
 
   it("devrait dire qu'un décalage a été saisi", () => {
     show({ date: "1950-03-01", time: "10:00", utcOffsetOverride: "+01:00" });
-    expect(notes()).toEqual([S.noteInstant("1er mars 1950", "09:00", "+01:00", true)]);
+    expect(tip(S.calculationTitle)).toEqual([S.noteInstant("1er mars 1950", "09:00", "+01:00", true), S.notKept]);
   });
 });

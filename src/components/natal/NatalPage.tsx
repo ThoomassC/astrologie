@@ -14,10 +14,12 @@ export function NatalPage() {
       <div className={layout.stack}>
         <ExplainedText text={content.intro} subject={content.title} />
         <NatalCalculator />
-        <ExplainedSection id="methode" text={content.method} />
-        <ExplainedSection id="lecture" text={content.reading} />
-        <ExplainedSection id="precision" text={content.accuracy} />
-        <ExplainedSection id="confidentialite" text={content.privacy} />
+        <div className={layout.cards}>
+          <ExplainedSection id="methode" level={3} text={content.method} className={layout.card} />
+          <ExplainedSection id="lecture" level={3} text={content.reading} className={layout.card} />
+          <ExplainedSection id="precision" level={3} text={content.accuracy} className={layout.card} />
+          <ExplainedSection id="confidentialite" level={3} text={content.privacy} className={layout.card} />
+        </div>
       </div>
     </main>
   );

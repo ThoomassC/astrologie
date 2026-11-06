@@ -55,8 +55,7 @@ describe("NATAL_STRINGS", () => {
     expect(S.bigThree("Cancer", "Gémeaux", null).join("")).toMatch(/^Soleil en Cancer, Lune en Gémeaux\. Sans l'heure/);
   });
 
-  it("devrait accorder les dominants au nombre", () => {
-    expect(S.dominantElements(["Feu"])).toBe("Élément dominant : Feu.");
-    expect(S.dominantModalities(["Cardinal", "Fixe"])).toBe("Modalités dominantes : Cardinal et Fixe.");
+  it("devrait nommer les éléments puis les modalités dominants", () => {
+    expect(S.dominants(["Feu"], ["Cardinal", "Fixe"]).replace(/\s/g, " ")).toBe("Dominantes : Feu ; Cardinal et Fixe.");
   });
 });

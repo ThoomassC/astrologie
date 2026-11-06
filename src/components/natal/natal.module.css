@@ -1,6 +1,6 @@
 /*
- * Calculateur du thème natal : un panneau (plaque filetée d'or). Formulaire en une colonne, champs de 44 px,
- * étiquettes au-dessus, erreur puis aide sous le champ ; puis le thème : roue, tableaux, répartition, lecture, notes.
+ * Calculateur du thème natal : un panneau (plaque filetée d'or). Formulaire en une ou deux colonnes, champs de 44 px,
+ * étiquettes au-dessus suivies de leur bulle « i », erreur sous le champ ; puis le thème : lecture, roue, tableaux.
  * Étiquettes, aides et tableaux viennent de `src/components/wheel/demo.module.css`, les détails de `text.module.css`.
  */
 
@@ -47,7 +47,39 @@
 .form {
   display: grid;
   gap: var(--s-6);
-  max-width: 44rem;
+}
+
+/* Grand écran : date et heure à gauche, lieu et réglages avancés à droite. */
+.columns {
+  display: grid;
+  gap: var(--s-6);
+}
+
+@media (min-width: 900px) {
+  .columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    column-gap: var(--s-7);
+  }
+}
+
+.column {
+  display: grid;
+  gap: var(--s-6);
+  min-width: 0;
+}
+
+/* Étiquette ou titre suivi de sa bulle « i ». */
+.labelRow,
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+
+.titleRow {
+  align-items: center;
 }
 
 .formTitle {
@@ -185,15 +217,9 @@
   justify-items: start;
 }
 
-.privacy {
-  max-width: var(--lecture);
-  color: var(--encre-douce);
-  font-size: var(--t-sm);
-}
 
 /* État du calcul : visible pendant le calcul et en cas d'échec ; une fois le thème affiché, seulement lu. */
 .status {
-  max-width: 44rem;
   padding: var(--s-3) var(--s-4);
   border: 1px solid var(--filet);
   border-radius: var(--r-md);
@@ -345,44 +371,22 @@
   font-size: var(--t-xs);
 }
 
-.dominant {
-  margin-top: var(--s-3);
-  font-size: var(--t-sm);
-}
-
-/* Lecture guidée : l'avertissement d'abord, encadré comme la note de l'astronome. */
+/* Lecture guidée : l'avertissement est dans la bulle « i » du titre. */
 .reading {
   display: grid;
   gap: var(--s-4);
   max-width: var(--lecture);
 }
 
-.reading ul,
-.notes {
+.reading ul {
   display: grid;
   gap: var(--s-3);
   margin: 0;
   padding-left: 1.25rem;
 }
 
-.reading li::marker,
-.notes li::marker {
+.reading li::marker {
   color: var(--or);
-}
-
-.caveat {
-  padding: var(--s-4) var(--s-5);
-  border: 2px solid color-mix(in srgb, var(--lapis) 55%, transparent);
-  border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--lapis) 6%, var(--plaque));
-  font-size: var(--t-sm);
-}
-
-.notes {
-  max-width: var(--lecture);
-  gap: var(--s-2);
-  color: var(--encre-douce);
-  font-size: var(--t-sm);
 }
 
 @media (forced-colors: active) {

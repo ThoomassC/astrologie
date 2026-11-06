@@ -1,6 +1,7 @@
 import { type FormEvent, type MouseEvent, type Ref, useId, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import text from "@/components/text/text.module.css";
+import { InfoTip } from "@/components/text/InfoTip";
 import demo from "@/components/wheel/demo.module.css";
 import { HOUSE_SYSTEM_NAMES } from "@/i18n/names";
 import {
@@ -297,12 +298,14 @@ export function BirthForm({ onValid, onWarmUp, dateRef }: BirthFormProps) {
       aria-labelledby={`${id}-titre`}
       aria-describedby={`${id}-obligatoires`}
     >
-      <h2 id={`${id}-titre`} className={styles.formTitle}>
-        {S.title}
-      </h2>
-      <p id={`${id}-obligatoires`} className={styles.privacy}>
-        {S.requiredNote}
-      </p>
+      <div className={styles.labelRow}>
+        <h2 id={`${id}-titre`} className={styles.formTitle}>
+          {S.title}
+        </h2>
+        <InfoTip subject={S.title} id={`${id}-obligatoires`}>
+          {S.requiredNote}
+        </InfoTip>
+      </div>
 
       {errors.length > 0 ? (
         <div
@@ -332,222 +335,241 @@ export function BirthForm({ onValid, onWarmUp, dateRef }: BirthFormProps) {
         </div>
       ) : null}
 
-      <fieldset className={styles.group}>
-        <legend>{S.birthLegend}</legend>
-        <div className={styles.pair}>
-          <div className={demo.field}>
-            <label htmlFor={fieldId("date")}>{S.date}</label>
-            <input
-              {...control("date")}
-              ref={dateRef}
-              className={styles.control}
-              type="date"
-              min={MIN_DATE}
-              max={MAX_DATE}
-              required
-              value={values.date}
-              onChange={(event) => set("date", event.target.value)}
-              aria-describedby={describedBy("date", helpId("date"))}
-            />
-            {errorText("date")}
-            <p id={helpId("date")} className={demo.help}>
-              {S.dateHelp}
-            </p>
-          </div>
-          <div className={demo.field}>
-            <label htmlFor={fieldId("time")}>{S.time}</label>
-            <input
-              {...control("time")}
-              className={styles.control}
-              type="time"
-              required={!values.timeUnknown}
-              disabled={values.timeUnknown}
-              value={values.time}
-              onChange={(event) => set("time", event.target.value)}
-              aria-describedby={describedBy("time", helpId("time"))}
-            />
-            {errorText("time")}
-            <p id={helpId("time")} className={demo.help}>
-              {S.timeHelp}
-            </p>
-          </div>
-        </div>
-        <div>
-          <label className={styles.check}>
-            <input
-              type="checkbox"
-              checked={values.timeUnknown}
-              onChange={(event) => set("timeUnknown", event.target.checked)}
-              aria-describedby={`${id}-heure-inconnue`}
-            />
-            {S.timeUnknown}
-          </label>
-          <p id={`${id}-heure-inconnue`} className={demo.help}>
-            {S.timeUnknownHelp}
-          </p>
-        </div>
-      </fieldset>
-
-      <fieldset className={styles.group}>
-        <legend>{S.placeLegend}</legend>
-        <div className={demo.field}>
-          <label htmlFor={fieldId("city")}>{S.city}</label>
-          <select
-            {...control("city")}
-            className={styles.control}
-            required
-            value={values.place}
-            onChange={(event) => choosePlace(event.target.value)}
-            aria-describedby={describedBy("city", helpId("city"))}
-          >
-            <option value="">{S.cityChoose}</option>
-            {CITY_GROUPS.map((group) => (
-              <optgroup key={group.country} label={group.label}>
-                {group.cities.map((key) => (
-                  <option key={key} value={key}>
-                    {CITY_STRINGS.cities[key]}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-            <option value={OTHER_PLACE}>{S.cityOther}</option>
-          </select>
-          {errorText("city")}
-          <p id={helpId("city")} className={demo.help}>
-            {S.cityHelp}
-          </p>
-        </div>
-
-        {manual ? (
-          <>
-            <div className={styles.pair}>
-              <div className={demo.field}>
-                <label htmlFor={fieldId("latitude")}>{S.latitude}</label>
-                <input
-                  {...control("latitude")}
-                  className={styles.control}
-                  type="text"
-                  spellCheck={false}
-                  required
-                  value={values.latitude}
-                  onChange={(event) => typeLatitude(event.target.value)}
-                  aria-describedby={describedBy("latitude", coordinatesHelpId)}
-                />
-                {errorText("latitude")}
-              </div>
-              <div className={demo.field}>
-                <label htmlFor={fieldId("longitude")}>{S.longitude}</label>
-                <input
-                  {...control("longitude")}
-                  className={styles.control}
-                  type="text"
-                  spellCheck={false}
-                  required
-                  value={values.longitude}
-                  onChange={(event) => set("longitude", event.target.value)}
-                  aria-describedby={describedBy(
-                    "longitude",
-                    ...(suspicion ? [warningId] : []),
-                    coordinatesHelpId,
-                  )}
-                />
-                {errorText("longitude")}
-                {suspicion ? (
-                  <p id={warningId} className={styles.warning}>
-                    {S.longitudeWarning(suspicion.east, suspicion.zone, suspicion.suggestion)}
-                  </p>
-                ) : null}
-              </div>
-            </div>
-            <p id={coordinatesHelpId} className={demo.help}>
-              {S.coordinatesHelp}
-            </p>
+      {/* Sur grand écran, deux colonnes : date et heure, puis lieu et réglages avancés. */}
+      <div className={styles.columns}>
+        <fieldset className={styles.group}>
+          <legend>{S.birthLegend}</legend>
+          <div className={styles.pair}>
             <div className={demo.field}>
-              <label htmlFor={fieldId("timeZone")}>{S.timeZone}</label>
+              <div className={styles.labelRow}>
+                <label htmlFor={fieldId("date")}>{S.date}</label>
+                <InfoTip subject={S.date} id={helpId("date")}>
+                  {S.dateHelp}
+                </InfoTip>
+              </div>
               <input
-                {...control("timeZone")}
+                {...control("date")}
+                ref={dateRef}
                 className={styles.control}
-                type="text"
-                list={`${id}-fuseaux`}
-                autoCapitalize="off"
-                autoCorrect="off"
-                spellCheck={false}
-                required={values.utcOffset.trim() === ""}
-                value={values.timeZone}
-                onChange={(event) => set("timeZone", event.target.value)}
-                aria-describedby={describedBy("timeZone", helpId("timeZone"))}
+                type="date"
+                min={MIN_DATE}
+                max={MAX_DATE}
+                required
+                value={values.date}
+                onChange={(event) => set("date", event.target.value)}
+                aria-describedby={describedBy("date", helpId("date"))}
               />
-              <datalist id={`${id}-fuseaux`}>
-                {timeZoneSuggestions().map((zone) => (
-                  <option key={zone} value={zone} />
-                ))}
-              </datalist>
-              {errorText("timeZone")}
-              <p id={helpId("timeZone")} className={demo.help}>
-                {S.timeZoneHelp}
-              </p>
+              {errorText("date")}
             </div>
-          </>
-        ) : null}
-      </fieldset>
+            <div className={demo.field}>
+              <div className={styles.labelRow}>
+                <label htmlFor={fieldId("time")}>{S.time}</label>
+                <InfoTip subject={S.time} id={helpId("time")}>
+                  {S.timeHelp}
+                </InfoTip>
+              </div>
+              <input
+                {...control("time")}
+                className={styles.control}
+                type="time"
+                required={!values.timeUnknown}
+                disabled={values.timeUnknown}
+                value={values.time}
+                onChange={(event) => set("time", event.target.value)}
+                aria-describedby={describedBy("time", helpId("time"))}
+              />
+              {errorText("time")}
+            </div>
+          </div>
+          <div className={styles.labelRow}>
+            <label className={styles.check}>
+              <input
+                type="checkbox"
+                checked={values.timeUnknown}
+                onChange={(event) => set("timeUnknown", event.target.checked)}
+                aria-describedby={`${id}-heure-inconnue`}
+              />
+              {S.timeUnknown}
+            </label>
+            <InfoTip subject={S.timeUnknown} id={`${id}-heure-inconnue`}>
+              {S.timeUnknownHelp}
+            </InfoTip>
+          </div>
+        </fieldset>
 
-      <details
-        className={text.details}
-        open={advancedOpen}
-        onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
-      >
-        <summary className={text.summary}>
-          <span className={text.plus} aria-hidden="true" />
-          {S.advanced}
-        </summary>
-        <div className={text.panel}>
-          <div className={demo.field}>
-            <label htmlFor={fieldId("houseSystem")}>{S.houseSystem}</label>
-            <select
-              {...control("houseSystem")}
-              className={styles.control}
-              value={values.houseSystem}
-              onChange={(event) => set("houseSystem", event.target.value)}
-              aria-describedby={describedBy("houseSystem", helpId("houseSystem"))}
-            >
-              {HOUSE_SYSTEM_KEYS.map((key) => (
-                <option key={key} value={key}>
-                  {HOUSE_SYSTEM_NAMES[key]}
-                </option>
-              ))}
-            </select>
-            {errorText("houseSystem")}
-            <p id={helpId("houseSystem")} className={demo.help}>
-              {S.houseSystemHelp}
-            </p>
-          </div>
-          <div className={demo.field}>
-            <label htmlFor={fieldId("utcOffset")}>{S.utcOffset}</label>
-            <input
-              {...control("utcOffset")}
-              className={styles.control}
-              type="text"
-              spellCheck={false}
-              value={values.utcOffset}
-              onChange={(event) => set("utcOffset", event.target.value)}
-              aria-describedby={describedBy("utcOffset", helpId("utcOffset"))}
-            />
-            {errorText("utcOffset")}
-            <p id={helpId("utcOffset")} className={demo.help}>
-              {S.utcOffsetHelp}
-            </p>
-          </div>
+        <div className={styles.column}>
+          <fieldset className={styles.group}>
+            <legend>{S.placeLegend}</legend>
+            <div className={demo.field}>
+              <div className={styles.labelRow}>
+                <label htmlFor={fieldId("city")}>{S.city}</label>
+                <InfoTip subject={S.city} id={helpId("city")}>
+                  {S.cityHelp}
+                </InfoTip>
+              </div>
+              <select
+                {...control("city")}
+                className={styles.control}
+                required
+                value={values.place}
+                onChange={(event) => choosePlace(event.target.value)}
+                aria-describedby={describedBy("city", helpId("city"))}
+              >
+                <option value="">{S.cityChoose}</option>
+                {CITY_GROUPS.map((group) => (
+                  <optgroup key={group.country} label={group.label}>
+                    {group.cities.map((key) => (
+                      <option key={key} value={key}>
+                        {CITY_STRINGS.cities[key]}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+                <option value={OTHER_PLACE}>{S.cityOther}</option>
+              </select>
+              {errorText("city")}
+            </div>
+
+            {manual ? (
+              <>
+                <div className={styles.pair}>
+                  <div className={demo.field}>
+                    <div className={styles.labelRow}>
+                      <label htmlFor={fieldId("latitude")}>{S.latitude}</label>
+                      <InfoTip subject={S.latitude} id={coordinatesHelpId}>
+                        {S.coordinatesHelp}
+                      </InfoTip>
+                    </div>
+                    <input
+                      {...control("latitude")}
+                      className={styles.control}
+                      type="text"
+                      spellCheck={false}
+                      required
+                      value={values.latitude}
+                      onChange={(event) => typeLatitude(event.target.value)}
+                      aria-describedby={describedBy("latitude", coordinatesHelpId)}
+                    />
+                    {errorText("latitude")}
+                  </div>
+                  <div className={demo.field}>
+                    <label htmlFor={fieldId("longitude")}>{S.longitude}</label>
+                    <input
+                      {...control("longitude")}
+                      className={styles.control}
+                      type="text"
+                      spellCheck={false}
+                      required
+                      value={values.longitude}
+                      onChange={(event) => set("longitude", event.target.value)}
+                      aria-describedby={describedBy(
+                        "longitude",
+                        ...(suspicion ? [warningId] : []),
+                        coordinatesHelpId,
+                      )}
+                    />
+                    {errorText("longitude")}
+                    {suspicion ? (
+                      <p id={warningId} className={styles.warning}>
+                        {S.longitudeWarning(suspicion.east, suspicion.zone, suspicion.suggestion)}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+                <div className={demo.field}>
+                  <div className={styles.labelRow}>
+                    <label htmlFor={fieldId("timeZone")}>{S.timeZone}</label>
+                    <InfoTip subject={S.timeZone} id={helpId("timeZone")}>
+                      {S.timeZoneHelp}
+                    </InfoTip>
+                  </div>
+                  <input
+                    {...control("timeZone")}
+                    className={styles.control}
+                    type="text"
+                    list={`${id}-fuseaux`}
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    required={values.utcOffset.trim() === ""}
+                    value={values.timeZone}
+                    onChange={(event) => set("timeZone", event.target.value)}
+                    aria-describedby={describedBy("timeZone", helpId("timeZone"))}
+                  />
+                  <datalist id={`${id}-fuseaux`}>
+                    {timeZoneSuggestions().map((zone) => (
+                      <option key={zone} value={zone} />
+                    ))}
+                  </datalist>
+                  {errorText("timeZone")}
+                </div>
+              </>
+            ) : null}
+          </fieldset>
+
+          <details
+            className={text.details}
+            open={advancedOpen}
+            onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
+          >
+            <summary className={text.summary}>
+              <span className={text.plus} aria-hidden="true" />
+              {S.advanced}
+            </summary>
+            <div className={text.panel}>
+              <div className={demo.field}>
+                <div className={styles.labelRow}>
+                  <label htmlFor={fieldId("houseSystem")}>{S.houseSystem}</label>
+                  <InfoTip subject={S.houseSystem} id={helpId("houseSystem")}>
+                    {S.houseSystemHelp}
+                  </InfoTip>
+                </div>
+                <select
+                  {...control("houseSystem")}
+                  className={styles.control}
+                  value={values.houseSystem}
+                  onChange={(event) => set("houseSystem", event.target.value)}
+                  aria-describedby={describedBy("houseSystem", helpId("houseSystem"))}
+                >
+                  {HOUSE_SYSTEM_KEYS.map((key) => (
+                    <option key={key} value={key}>
+                      {HOUSE_SYSTEM_NAMES[key]}
+                    </option>
+                  ))}
+                </select>
+                {errorText("houseSystem")}
+              </div>
+              <div className={demo.field}>
+                <div className={styles.labelRow}>
+                  <label htmlFor={fieldId("utcOffset")}>{S.utcOffset}</label>
+                  <InfoTip subject={S.utcOffset} id={helpId("utcOffset")}>
+                    {S.utcOffsetHelp}
+                  </InfoTip>
+                </div>
+                <input
+                  {...control("utcOffset")}
+                  className={styles.control}
+                  type="text"
+                  spellCheck={false}
+                  value={values.utcOffset}
+                  onChange={(event) => set("utcOffset", event.target.value)}
+                  aria-describedby={describedBy("utcOffset", helpId("utcOffset"))}
+                />
+                {errorText("utcOffset")}
+              </div>
+            </div>
+          </details>
         </div>
-      </details>
+      </div>
 
       <div className={styles.submitRow}>
-        <p id={`${id}-confidentialite`} className={styles.privacy}>
-          {S.privacy}
-        </p>
         <div className={styles.actions}>
           <button type="submit" className="bouton" aria-describedby={`${id}-confidentialite`}>
             {S.submit}
           </button>
+          <InfoTip subject={S.privacyTitle} id={`${id}-confidentialite`}>
+            {S.privacy}
+          </InfoTip>
           <button type="button" className="bouton bouton-second" onClick={clear}>
             {S.clear}
           </button>

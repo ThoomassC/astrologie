@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Fragment, type ReactNode, type Ref, useId } from "react";
 import { Glyph, hasGlyph } from "@/components/glyphs/Glyph";
+import { InfoTip } from "@/components/text/InfoTip";
 import demo from "@/components/wheel/demo.module.css";
 import { ZodiacWheel } from "@/components/wheel/ZodiacWheel";
 import {
@@ -138,12 +139,15 @@ function AspectTable({ aspects, caption }: { aspects: readonly Aspect[]; caption
   );
 }
 
-/** Une section du thème : titre, phrase de résumé, puis le détail derrière le bouton « Détails ». */
-function Block({ title, lead, children }: { title: string; lead: ReactNode; children: ReactNode }) {
+/** Une section du thème : titre (et sa bulle de précisions), résumé d'une ligne, le détail derrière « Détails ». */
+function Block({ title, tip, lead, children }: { title: string; tip?: ReactNode; lead: ReactNode; children: ReactNode }) {
   const id = useId();
   return (
     <section className={styles.block} aria-labelledby={id}>
-      <h3 id={id}>{title}</h3>
+      <div className={styles.titleRow}>
+        <h3 id={id}>{title}</h3>
+        {tip ? <InfoTip subject={title}>{tip}</InfoTip> : null}
+      </div>
       <div className={styles.lead}>{lead}</div>
       <NatalDetails subject={title}>{children}</NatalDetails>
     </section>
@@ -159,8 +163,8 @@ interface ChartResultProps {
 
 /**
  * Le thème calculé, du plus simple au plus technique : les trois signes, la lecture guidée, la roue, puis positions,
- * aspects, répartition et maisons (chacun résumé d'une phrase, le tableau derrière « Détails »), enfin les notes. Liens
- * sans préchargement : un préchargement dirait au serveur quels signes et quelles planètes la page affiche.
+ * aspects, répartition et maisons (chacun résumé d'une ligne, le tableau derrière « Détails ») ; les précisions sont
+ * dans les bulles « i ». Liens sans préchargement : un préchargement dirait au serveur quels signes la page affiche.
  */
 export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
   const id = useId();
@@ -223,9 +227,17 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
   return (
     <section className={styles.result} aria-labelledby={`${id}-titre`}>
       <header className={styles.resultHead}>
-        <h2 id={`${id}-titre`} ref={titleRef} tabIndex={-1} className={styles.resultTitle}>
-          {S.resultTitle}
-        </h2>
+        <div className={styles.titleRow}>
+          <h2 id={`${id}-titre`} ref={titleRef} tabIndex={-1} className={styles.resultTitle}>
+            {S.resultTitle}
+          </h2>
+          <InfoTip subject={S.calculationTitle}>
+            <p>{S.noteInstant(utc.date, utc.time, clockOffset(input.offsetSeconds), input.offsetSource === "manual")}</p>
+            {timeKnown ? null : <p>{S.noteTimeUnknown}</p>}
+            {input.zoneHistoryUncertain && input.timeZone !== null ? <p>{S.noteZone(input.timeZone)}</p> : null}
+            <p>{S.notKept}</p>
+          </InfoTip>
+        </div>
         <p className={styles.birth}>
           {S.birth(longDate(input.local), input.timeKnown ? clockTime(input.local) : null, placeOf(chart))}
         </p>
@@ -234,16 +246,17 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
             <Fragment key={index}>{part}</Fragment>
           ))}
         </p>
-        <div className={styles.submitRow}>
-          {editButton}
-          <p className={styles.privacy}>{S.notKept}</p>
-        </div>
+        <p>{editButton}</p>
       </header>
 
       <section className={`${styles.block} ${styles.reading}`} aria-labelledby={`${id}-lecture`}>
-        <h3 id={`${id}-lecture`}>{R.title}</h3>
-        <p>{R.intro}</p>
-        <p className={styles.caveat}>{R.caveat}</p>
+        <div className={styles.titleRow}>
+          <h3 id={`${id}-lecture`}>{R.title}</h3>
+          <InfoTip subject={R.title}>
+            <p>{R.intro}</p>
+            <p>{R.caveat}</p>
+          </InfoTip>
+        </div>
         <ul>
           {FIRST_READ.map(reading)}
           {angles !== null && ascendantSign !== null ? (
@@ -293,7 +306,10 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
         </div>
       </section>
 
-      <Block title={S.positionsTitle} lead={S.positionsSummary(retrogrades.map((key) => POINT_NAMES[key].name))}>
+      <Block
+        title={S.positionsTitle}
+        tip={uncertain.length > 0 ? S.noteUncertain(uncertain.map((key) => POINT_NAMES[key].name)) : undefined}
+        lead={S.positionsSummary(retrogrades.map((key) => POINT_NAMES[key].name))}>
         <div className={demo.tableWrap} role="group" aria-labelledby={`${id}-positions-titre`} tabIndex={0}>
           <table id={`${id}-positions`} className={demo.table}>
             <caption id={`${id}-positions-titre`}>{S.positionsTitle}</caption>
@@ -357,12 +373,10 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
 
       <Block
         title={S.balanceTitle}
-        lead={
-          <p>
-            {S.dominantElements(balance.dominantElements.map((key) => ELEMENT_NAMES[key].name))}{" "}
-            {S.dominantModalities(balance.dominantModalities.map((key) => MODALITY_NAMES[key].name))}
-          </p>
-        }
+        lead={S.dominants(
+          balance.dominantElements.map((key) => ELEMENT_NAMES[key].name),
+          balance.dominantModalities.map((key) => MODALITY_NAMES[key].name),
+        )}
       >
         <div className={styles.balance}>
           <div>
@@ -411,6 +425,7 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
       {angles !== null && houses !== null ? (
         <Block
           title={S.housesTitle}
+          tip={houses.fallback ? S.noteFallback(houses.fallback.reason === "polar-latitude") : undefined}
           lead={S.housesSummary(
             HOUSE_SYSTEM_NAMES[houses.used],
             formatPosition(angles.ascendant),
@@ -444,16 +459,6 @@ export function ChartResult({ chart, titleRef, onEdit }: ChartResultProps) {
         </Block>
       ) : null}
 
-      <section className={styles.block} aria-labelledby={`${id}-notes`}>
-        <h3 id={`${id}-notes`}>{S.notesTitle}</h3>
-        <ul className={styles.notes}>
-          {timeKnown ? null : <li>{S.noteTimeUnknown}</li>}
-          {uncertain.length > 0 ? <li>{S.noteUncertain(uncertain.map((key) => POINT_NAMES[key].name))}</li> : null}
-          {input.zoneHistoryUncertain && input.timeZone !== null ? <li>{S.noteZone(input.timeZone)}</li> : null}
-          {houses?.fallback ? <li>{S.noteFallback(houses.fallback.reason === "polar-latitude")}</li> : null}
-          <li>{S.noteInstant(utc.date, utc.time, clockOffset(input.offsetSeconds), input.offsetSource === "manual")}</li>
-        </ul>
-      </section>
 
       <p>{editButton}</p>
     </section>
