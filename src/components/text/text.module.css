@@ -269,15 +269,15 @@ h3.sectionTitle {
 
 /*
  * Bulle d'information « i » : un petit bouton rond posé en haut à droite du texte, comme un appel de note, et un
- * panneau en popover (Échap et clic dehors le ferment). Le rond fait 18 px ; sa zone de clic, 24 px (WCAG 2.5.8).
+ * panneau en popover (Échap et clic dehors le ferment). Le rond fait 16 px ; sa zone de clic, 24 px (WCAG 2.5.8).
  */
 .info {
   position: relative;
   display: inline-grid;
   place-items: center;
   align-self: flex-start;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   margin-inline-start: 0.125rem;
   margin-block-start: -0.2em;
   padding: 0;
@@ -287,7 +287,7 @@ h3.sectionTitle {
   color: var(--lapis);
   font-family: var(--font-fell);
   font-style: italic;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   line-height: 1;
   vertical-align: super;
   cursor: help;
@@ -296,7 +296,7 @@ h3.sectionTitle {
 .info::after {
   content: "";
   position: absolute;
-  inset: -3px;
+  inset: -4px;
   border-radius: inherit;
 }
 
