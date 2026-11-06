@@ -4,6 +4,7 @@ import { Glyph } from "@/components/glyphs/Glyph";
 import { Estampe } from "@/components/text/Estampe";
 import { ExplainedSection, ExplainedText } from "@/components/text/ExplainedSection";
 import { Fiche } from "@/components/text/Fiche";
+import { InfoTip } from "@/components/text/InfoTip";
 import layout from "@/components/text/layout.module.css";
 import { PageHeader } from "@/components/text/PageHeader";
 import { ZodiacWheel } from "@/components/wheel/ZodiacWheel";
@@ -146,9 +147,9 @@ export function SignPage({ sign }: { sign: SignKey }) {
           )}
           {ophiuchus && sign === "scorpio"
             ? ` ${ui.passageOphiuchus(PASSAGE_YEAR, formatUtcDay(ophiuchus.startUtcMs), formatUtcDay(ophiuchus.endUtcMs))}`
-            : null}
+            : null}{" "}
+          <InfoTip subject={ui.passageInfo}>{ui.passageNote}</InfoTip>
         </p>
-        <p className={styles.passageNote}>{ui.passageNote}</p>
       </div>
     ) : null,
   };

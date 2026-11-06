@@ -33,6 +33,7 @@ export interface UiContent {
     readonly passage: (year: number, constellationOf: string, start: string, end: string) => string;
     readonly passageOphiuchus: (year: number, start: string, end: string) => string;
     readonly passageNote: string;
+    readonly passageInfo: string;
     readonly previous: string;
     readonly next: string;
     readonly signsOf: (name: string) => string;

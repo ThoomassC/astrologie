@@ -42,6 +42,7 @@ export const UI_FR: UiContent = {
       `En ${year}, le Soleil traverse la constellation ${constellationOf} du ${start} au ${end}.`,
     passageOphiuchus: (year, start, end) =>
       `Puis il passe par Ophiuchus, le Serpentaire, du ${start} au ${end} ${year} : une constellation que le zodiaque des astrologues ne compte pas.`,
+    passageInfo: "la méthode de calcul de ces dates",
     passageNote: "Dates calculées pour ce site avec les limites officielles des constellations (Union astronomique internationale), à un jour près.",
     previous: "Signe précédent",
     next: "Signe suivant",

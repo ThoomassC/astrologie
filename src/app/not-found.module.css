@@ -1,4 +1,5 @@
 .main {
+  width: 100%;
   max-width: var(--lecture);
   margin: 0 auto;
   padding: var(--s-9) var(--gouttiere) var(--s-7);

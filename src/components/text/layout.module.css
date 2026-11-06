@@ -1,6 +1,7 @@
 /* Gabarits de page : colonne de lecture et manchettes (notes en marge). */
 
 .page {
+  width: 100%;
   max-width: var(--page);
   margin: 0 auto;
   padding: 0 var(--gouttiere);
@@ -43,4 +44,30 @@
   font-size: var(--t-3xl);
   padding-top: var(--s-4);
   border-top: 1px solid var(--filet);
+}
+
+/* Cartes de notions : trois par rangée sur grand écran, elles prennent toute la largeur. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--s-5);
+}
+
+@media (min-width: 960px) {
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.card {
+  align-content: start;
+  padding: var(--s-5);
+  background: var(--plaque);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-lg);
+}
+
+.card h2,
+.card h3 {
+  font-size: var(--t-xl);
 }

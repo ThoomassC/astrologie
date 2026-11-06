@@ -55,32 +55,18 @@ h3.sectionTitle {
 }
 
 .plus {
-  position: relative;
-  width: 14px;
-  height: 14px;
+  width: 9px;
+  height: 9px;
   flex: none;
+  margin-inline: 2px;
+  border-right: 1.6px solid currentColor;
+  border-bottom: 1.6px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
   transition: transform var(--duree) ease;
 }
 
-.plus::before,
-.plus::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 14px;
-  height: 1.5px;
-  border-radius: 2px;
-  background: currentColor;
-  translate: -50% -50%;
-}
-
-.plus::after {
-  rotate: 90deg;
-}
-
 .details[open] > .summary .plus {
-  transform: rotate(45deg);
+  transform: translateY(2px) rotate(-135deg);
 }
 
 .whenOpen,
@@ -279,5 +265,56 @@ h3.sectionTitle {
 
   .pastille::before {
     background: CanvasText;
+  }
+}
+
+/* Bulle d'information « i » : un bouton rond, un panneau en popover (Échap et clic dehors le ferment). */
+.info {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-inline-start: var(--s-1);
+  padding: 0;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--filet-fort);
+  background: transparent;
+  color: var(--lapis);
+  font-family: var(--font-fell);
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1;
+  vertical-align: middle;
+  cursor: help;
+}
+
+.info:hover {
+  background: color-mix(in srgb, var(--lapis) 10%, transparent);
+}
+
+.infoPanel {
+  max-width: min(22rem, calc(100vw - 2rem));
+  margin: auto;
+  padding: var(--s-4) var(--s-5);
+  border: 1px solid var(--filet-fort);
+  border-radius: var(--r-md);
+  background: var(--plaque);
+  color: var(--encre);
+  font-family: var(--font-texte);
+  font-style: normal;
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  box-shadow: 0 16px 40px -20px rgb(0 0 0 / 0.5);
+}
+
+.infoPanel::backdrop {
+  background: transparent;
+}
+
+@supports (position-anchor: --a) {
+  .infoPanel {
+    position-area: bottom span-right;
+    position-try-fallbacks: flip-block, flip-inline;
+    margin: var(--s-2) 0 0;
   }
 }

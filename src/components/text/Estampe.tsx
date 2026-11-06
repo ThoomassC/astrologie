@@ -2,6 +2,7 @@ import Image, { type StaticImageData } from "next/image";
 import { getCommonContent } from "@/content/common/content";
 import { creditLine } from "@/content/images/fr";
 import type { ImageCredit } from "@/content/images/types";
+import { InfoTip } from "./InfoTip";
 import styles from "./text.module.css";
 
 interface EstampeProps {
@@ -17,7 +18,7 @@ interface EstampeProps {
 
 /** Estampe : image dans un passe-partout fileté d'or, légende, puis crédit et licence avec lien vers la source. */
 export function Estampe({ image, alt, caption, credit, sizes, priority = false, className }: EstampeProps) {
-  const { imageSource } = getCommonContent();
+  const { imageSource, imageCredit } = getCommonContent();
   return (
     <figure className={`${styles.estampe} ${className ?? ""}`}>
       <div className={styles.mat}>
@@ -25,12 +26,12 @@ export function Estampe({ image, alt, caption, credit, sizes, priority = false, 
       </div>
       <figcaption>
         {caption ? <span className={styles.caption}>{caption}</span> : null}
-        <span className={styles.credit}>
+        <InfoTip subject={imageCredit}>
           {creditLine(credit)}{" "}
           <a href={credit.pageHref} rel="noopener">
             {imageSource}
           </a>
-        </span>
+        </InfoTip>
       </figcaption>
     </figure>
   );

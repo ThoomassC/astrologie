@@ -121,8 +121,10 @@ export function SignsIndexPage() {
           </div>
         </section>
 
-        <ExplainedSection id="polarite" text={content.polarity} />
-        <ExplainedSection id="cuspides" text={content.cusps} />
+        <div className={layout.cards}>
+          <ExplainedSection id="polarite" level={3} text={content.polarity} className={layout.card} />
+          <ExplainedSection id="cuspides" level={3} text={content.cusps} className={layout.card} />
+        </div>
       </div>
     </main>
   );

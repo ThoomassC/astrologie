@@ -10,6 +10,7 @@ import { computeHouses } from "@/lib/astro/houses";
 import { HOUSE_SYSTEM_KEYS, type HouseSystemKey } from "@/lib/astro/keys";
 import { signOf } from "@/lib/astro/zodiac";
 import { HOUSES_STRINGS as S } from "./houses.strings";
+import { InfoTip } from "@/components/text/InfoTip";
 import styles from "@/components/wheel/demo.module.css";
 
 /** Obliquité de l'écliptique, à peu près celle d'aujourd'hui. */
@@ -43,10 +44,12 @@ export function HouseSystemsDemo() {
 
   return (
     <section className={styles.demo} aria-labelledby={`${id}-titre`}>
-      <h2 id={`${id}-titre`} className={styles.demoTitle}>
-        {S.title}
-      </h2>
-      <p className={styles.demoIntro}>{S.intro}</p>
+      <div className={styles.titleRow}>
+        <h2 id={`${id}-titre`} className={styles.demoTitle}>
+          {S.title}
+        </h2>
+        <InfoTip subject={S.title}>{S.intro}</InfoTip>
+      </div>
       <div className={styles.demoGrid}>
         <div className={styles.demoWheel}>
           <ZodiacWheel
@@ -123,9 +126,9 @@ export function HouseSystemsDemo() {
             <output htmlFor={`${id}-ciel`} aria-hidden="true">
               {skyText}
             </output>
-            <p id={`${id}-aide`} className={styles.help}>
+            <InfoTip subject={S.sky} id={`${id}-aide`}>
               {S.skyHelp}
-            </p>
+            </InfoTip>
           </div>
 
           <p className={styles.status} aria-live="polite">

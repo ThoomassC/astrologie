@@ -12,4 +12,5 @@ export interface CommonContent {
   readonly hideDetails: string;
   /** Mot devant le nom de l'auteur d'une image, et renvoi vers sa page source. */
   readonly imageSource: string;
+  readonly imageCredit: string;
 }

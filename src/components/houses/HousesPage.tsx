@@ -49,11 +49,11 @@ export function HousesPage() {
           ))}
         </div>
 
-        <div className={layout.stack}>
+        <div className={layout.cards}>
           {HOUSE_SYSTEM_KEYS.map((key) => (
-            <ExplainedSection key={key} id={`systeme-${key}`} text={content.systems[key]} />
+            <ExplainedSection key={key} id={`systeme-${key}`} level={3} text={content.systems[key]} className={layout.card} />
           ))}
-          <ExplainedSection id="poles" text={content.polar} />
+          <ExplainedSection id="poles" level={3} text={content.polar} className={layout.card} />
         </div>
       </div>
     </main>

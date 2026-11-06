@@ -40,9 +40,11 @@ export function AspectsPage() {
         <AspectExplorer />
         <div className={styles.houses}>{MAJOR_ASPECT_KEYS.map(section)}</div>
         <div className={styles.houses}>{MINOR_ASPECT_KEYS.map(section)}</div>
-        <ExplainedSection id="orbes" text={content.orbs} />
-        <ExplainedSection id="appliquant-separant" text={content.applying} />
-        <ExplainedSection id="configurations" text={content.patterns} />
+        <div className={layout.cards}>
+          <ExplainedSection id="orbes" level={3} text={content.orbs} className={layout.card} />
+          <ExplainedSection id="appliquant-separant" level={3} text={content.applying} className={layout.card} />
+          <ExplainedSection id="configurations" level={3} text={content.patterns} className={layout.card} />
+        </div>
       </div>
     </main>
   );

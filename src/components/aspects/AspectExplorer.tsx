@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useId, useState } from "react";
+import { InfoTip } from "@/components/text/InfoTip";
 import styles from "@/components/wheel/demo.module.css";
 import { useSettledValue } from "@/components/wheel/useSettledValue";
 import { ZodiacWheel } from "@/components/wheel/ZodiacWheel";
@@ -101,10 +102,12 @@ export function AspectExplorer() {
 
   return (
     <section className={styles.demo} aria-labelledby={`${id}-titre`}>
-      <h2 id={`${id}-titre`} className={styles.demoTitle}>
-        {S.title}
-      </h2>
-      <p className={styles.demoIntro}>{S.intro}</p>
+      <div className={styles.titleRow}>
+        <h2 id={`${id}-titre`} className={styles.demoTitle}>
+          {S.title}
+        </h2>
+        <InfoTip subject={S.title}>{S.intro}</InfoTip>
+      </div>
       <div className={styles.demoGrid}>
         <div className={styles.demoWheel}>
           <ZodiacWheel
