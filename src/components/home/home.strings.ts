@@ -5,7 +5,6 @@ import type { MoonPhaseKey } from "@/lib/astro/moonPhase";
 /** Textes du ciel du jour (composant client de l'accueil). */
 export interface HomeStrings {
   title: string;
-  lead: string;
   loading: string;
   error: string;
   retry: string;
@@ -49,7 +48,6 @@ const longDate = (locale: Locale, date: Date) =>
 export const HOME_STRINGS: Readonly<Record<Locale, HomeStrings>> = {
   fr: {
     title: "Le ciel du jour",
-    lead: "Où sont le Soleil, la Lune et les planètes dans le zodiaque, en ce moment : calculé dans votre navigateur.",
     loading: "Calcul des positions du jour…",
     error: "Les positions du jour n'ont pas pu être calculées. Vérifiez votre connexion, puis recalculez.",
     retry: "Recalculer les positions",
@@ -86,7 +84,6 @@ export const HOME_STRINGS: Readonly<Record<Locale, HomeStrings>> = {
   },
   en: {
     title: "Today's sky",
-    lead: "Where the Sun, the Moon and the planets are in the zodiac right now: calculated in your browser.",
     loading: "Calculating today's positions…",
     error: "Today's positions could not be calculated. Check your connection, then recalculate.",
     retry: "Recalculate the positions",

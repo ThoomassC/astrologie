@@ -56,14 +56,6 @@
   line-height: 0.95;
 }
 
-.heroLead {
-  max-width: 32rem;
-  font-family: var(--font-fell);
-  font-style: italic;
-  font-size: var(--t-xl);
-  line-height: 1.35;
-  color: var(--encre-douce);
-}
 
 .sentence {
   max-width: 34rem;

@@ -113,6 +113,7 @@ export function TodaySky() {
   return (
     <div className={styles.hero}>
       <div className={styles.heroText}>
+        <h1 className={styles.heroTitle}>{S.title}</h1>
         <p ref={statusRef} tabIndex={-1} className={styles.date} aria-live="polite">
           {state.status === "ready" ? S.date(state.at) : state.status === "error" ? S.error : S.loading}
         </p>
@@ -123,8 +124,6 @@ export function TodaySky() {
             </button>
           </p>
         ) : null}
-        <h1 className={styles.heroTitle}>{S.title}</h1>
-        <p className={styles.heroLead}>{S.lead}</p>
         {sky ? (
           <p className={styles.sentence}>
             {S.sun(signs[sky.positions.sun.sign].the)}{" "}
