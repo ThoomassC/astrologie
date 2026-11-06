@@ -47,8 +47,9 @@
    * qu'après, et un espace reste sous les boutons.
    */
   .heroText {
+    display: flex;
+    flex-direction: column;
     gap: var(--s-3);
-    align-content: start;
     min-height: calc(100dvh - var(--barre) - var(--s-3) - var(--s-4) - min(100vw - 2 * var(--gouttiere), 34rem, 36dvh));
   }
 
@@ -61,9 +62,12 @@
     line-height: 1.5;
   }
 
-  .actions {
+  /* Les boutons au milieu de l'espace libre : autant au-dessus (sous la phrase) qu'au-dessous (bas de l'écran). */
+  .heroText .actions {
     justify-content: center;
-    margin-top: 0;
+    margin-block: auto;
+    /* Compense l'espace de la colonne au-dessus des boutons. */
+    padding-block-end: var(--s-3);
   }
 }
 
