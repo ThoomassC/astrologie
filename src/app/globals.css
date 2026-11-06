@@ -64,6 +64,9 @@
   --r-xs: 6px;
 
   --duree: 200ms;
+
+  /* Flèche des listes déroulantes, à la couleur de l'encre (une image ne lit pas les variables). */
+  --chevron-liste: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.25 6 8.25 10 4.25' fill='none' stroke='%2318215b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 /* Thème nuit : choisi par la bascule, ou par le système quand rien n'est choisi. */
@@ -85,6 +88,7 @@
   --eau: #7dbceb;
   --papier-opacite: 0.07;
   --papier-fusion: soft-light;
+  --chevron-liste: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.25 6 8.25 10 4.25' fill='none' stroke='%23ece6d6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   color-scheme: dark;
 }
 
@@ -107,6 +111,7 @@
     --eau: #7dbceb;
     --papier-opacite: 0.07;
     --papier-fusion: soft-light;
+    --chevron-liste: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.25 6 8.25 10 4.25' fill='none' stroke='%23ece6d6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     color-scheme: dark;
   }
 }
@@ -241,6 +246,23 @@ textarea {
 
 button {
   cursor: pointer;
+}
+
+/* Listes déroulantes : une flèche fine, posée en retrait du bord arrondi (la flèche native y était rognée). */
+select:not([multiple], [size]) {
+  appearance: none;
+  padding-inline-end: 2.25rem;
+  background-image: var(--chevron-liste);
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 12px 12px;
+}
+
+@media (forced-colors: active) {
+  select:not([multiple], [size]) {
+    appearance: auto;
+    background-image: none;
+  }
 }
 
 table {

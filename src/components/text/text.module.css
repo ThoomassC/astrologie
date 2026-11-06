@@ -267,13 +267,19 @@ h3.sectionTitle {
   }
 }
 
-/* Bulle d'information « i » : un bouton rond, un panneau en popover (Échap et clic dehors le ferment). */
+/*
+ * Bulle d'information « i » : un petit bouton rond posé en haut à droite du texte, comme un appel de note, et un
+ * panneau en popover (Échap et clic dehors le ferment). Le rond fait 18 px ; sa zone de clic, 24 px (WCAG 2.5.8).
+ */
 .info {
+  position: relative;
   display: inline-grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
-  margin-inline-start: var(--s-1);
+  align-self: flex-start;
+  width: 18px;
+  height: 18px;
+  margin-inline-start: 0.125rem;
+  margin-block-start: -0.2em;
   padding: 0;
   border-radius: var(--r-pill);
   border: 1px solid var(--filet-fort);
@@ -281,10 +287,17 @@ h3.sectionTitle {
   color: var(--lapis);
   font-family: var(--font-fell);
   font-style: italic;
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   line-height: 1;
-  vertical-align: middle;
+  vertical-align: super;
   cursor: help;
+}
+
+.info::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
 }
 
 .info:hover {

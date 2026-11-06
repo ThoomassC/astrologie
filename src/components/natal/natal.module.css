@@ -75,11 +75,18 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--s-2);
+  gap: var(--s-1) 0.125rem;
 }
 
 .titleRow {
   align-items: center;
+}
+
+/* À côté d'une case à cocher, la ligne est plus haute que le texte : la bulle se cale sur le haut du texte. */
+.labelRow:has(> .check) > button {
+  align-self: center;
+  margin-block-start: 0;
+  translate: 0 -0.45em;
 }
 
 .formTitle {

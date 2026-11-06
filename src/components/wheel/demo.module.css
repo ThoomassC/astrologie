@@ -12,7 +12,7 @@
 .titleRow {
   display: flex;
   align-items: center;
-  gap: var(--s-2);
+  gap: var(--s-1) 0.125rem;
 }
 
 .demoTitle {
@@ -122,10 +122,10 @@
 
 .field select {
   min-height: 44px;
-  padding: 0 var(--s-3);
+  padding-inline-start: var(--s-3);
   border-radius: var(--r-sm);
   border: 1px solid var(--encre-douce);
-  background: var(--fond);
+  background-color: var(--fond);
 }
 
 .help {

@@ -197,7 +197,7 @@
 .calendar {
   display: grid;
   gap: var(--s-2);
-  width: min(19rem, calc(100vw - 2.5rem));
+  width: min(20rem, calc(100vw - 2.5rem));
 }
 
 .calendarHead {
@@ -236,10 +236,17 @@
   padding-inline: var(--s-2);
   border: 1px solid var(--filet-fort);
   border-radius: var(--r-pill);
-  background: var(--plaque);
+  background-color: var(--plaque);
   color: var(--encre);
   font: inherit;
   cursor: pointer;
+}
+
+/* Listes compactes : flèche plus près du bord, pour laisser « Novembre » entier. */
+select.select {
+  padding-inline: var(--s-2) 1.6rem;
+  background-position: right 0.55rem center;
+  background-size: 10px 10px;
 }
 
 .select:hover {
